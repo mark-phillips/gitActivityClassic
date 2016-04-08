@@ -1,0 +1,35 @@
+Activity Classic
+
+Description
+
+The Activity Classic watch face combines the simplicity and readability of an analogue watch dial with the activity tracking capabilities of the fenix 3.
+
+Features include:
+
+- Top left quadrant:- Green/Orange/Red arc shows battery charge status.
+
+- Bottom right quadrant:- Blue arc shows steps indicating progress towards daily goal.
+
+- Bottom left quadrant:- Red arc shows move bar: triggered when it is time to move.
+
+- Switch between simple and advanced display using the 12/24hour system time setting. (The battery and steps icons are hidden in 12 hour mode).
+
+- Triangle at 12 o'clock indicates phone connection status: A blue triangle when the phone is connected and a red exclamation mark when disconnected.
+
+- Smart date placement: Date moves to 9 O'clock positition to avoid being obscured when hands are at 3 O'clock.
+
+- Second hand is displayed when watch enters high power mode (as with all watch faces this is under control of the the watch which switches modes automatically when it detects gestures - see https://forums.garmin.com/showthread.php?300514-Watch-hands-disappear-after-10-seconds).
+
+
+Version history:
+
+v1.1 - Changed layout for improved readabilty in poor light
+v1.0 - Initial release (available from: https://www.dropbox.com/s/aub5zlx1h5kueko/ActivityClassicv1.0.prg?dl=0 - can be side loaded by connecting watch to PC and copying the prg to \GARM\APPS) 
+
+
+
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  
+"C:\Program Files\Java\jre1.8.0_51\bin\java" -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -classpath "C:\Program Files\Java\jre1.8.0_51\lib\tools.jar;D:\garminSDK\bin\monkeybrains.jar;" com.garmin.monkeybrains.Monkeybrains -e -a D:\garminSDK\bin\api.db -i D:\garminSDK\bin\api.debug.xml -o C:\Users\mark\Dropbox\coding\ActivityClassicv2.iq -z C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\resources\resources.xml;C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\resources-d2bravo\resources.xml;C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\resources-fenix3\resources.xml -m C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\manifest.xml -u D:\garminSDK\bin\devices.xml -p D:\garminSDK\bin\projectInfo.xml C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\source\ActivityClassicView.mc C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\source\ActivityClassicApp.mc

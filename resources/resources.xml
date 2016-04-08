@@ -1,0 +1,16 @@
+<resources>
+    <string id="AppName">Activity Classic</string>
+
+    <bitmap id="LauncherIcon" filename="images/launcher_icon.png" />
+    <bitmap id="background_icons_id" filename="images/background-transparent-icons.png" >
+        <palette>
+					<color>FFFFFF</color>
+					<color>000000</color>
+					<color>00AAFF</color>
+					<color>AAAAAA</color>
+        </palette>
+    </bitmap>    
+    <fonts>
+        <font id="id_font_black_diamond" filename="fonts/blackdiamond.fnt" filter="0123456789" />
+    </fonts>
+</resources>
