@@ -305,7 +305,8 @@ class ActivityClassicView extends Ui.WatchFace {
 
         if (updateSettings) {
           RetrieveSettings();
-          Ui.requestUpdate();
+          updateSettings = false;
+          //Ui.requestUpdate();
         }
 
         activityInfo = Act.getInfo();
