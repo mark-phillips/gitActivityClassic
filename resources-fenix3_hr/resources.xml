@@ -1,5 +1,5 @@
 <resources>
-	<string id="id_device_type">D2 Bravo</string>
+	<string id="id_device_type">fēnix 3 HR</string>
 	<bitmap id="background_icons_id" filename="images/background-218x218-transparent-icons.png">
 		<palette>
 			<color>FFFFFF</color>

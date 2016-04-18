@@ -22,58 +22,29 @@ class ActivityClassicView extends Ui.WatchFace {
     var debug = false;
     var switch_date = false;
     var prevsteps = 0;
-    var feetcolour = Gfx.COLOR_LT_GRAY;
-    var firstUpdateAfterSleep = false;
-    var drawName = false;
-    var SHOW_ICONS = true;
-    var SMART_DATE = true;
-    var updateSettings = false;
 
     //! Constructor
     function initialize()
     {
-      RetrieveSettings() ;
     }
 
     //! Load resources
     function onLayout()
     {
-      font = Ui.loadResource(Rez.Fonts.id_font_black_diamond);
-      background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
-      deviceName = Ui.loadResource(Rez.Strings.id_device_type);
+        font = Ui.loadResource(Rez.Fonts.id_font_black_diamond);
+//        background = Ui.loadResource(Rez.Drawables.background_id);
+        background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
+        deviceName = Ui.loadResource(Rez.Strings.id_device_type);
     }
 
     function onShow()
     {
     }
 
-    // Pick up settings changes
-    // rmdir /s /q %temp%\garmin
-    function RetrieveSettings() {
-      SMART_DATE = Application.getApp().getProperty("SMART_DATE");
-      var icon_setting = Application.getApp().getProperty("SHOW_ICONS");
-      if (icon_setting == 0) {
-        if ( Sys.getDeviceSettings().is24Hour) {
-          SHOW_ICONS = true;
-        }
-        else {
-          SHOW_ICONS = false;
-        }
-      }
-      else  if (icon_setting == 1) {
-        SHOW_ICONS = true;
-      }
-      else if (icon_setting == 2) {
-        SHOW_ICONS = false;
-      }
-    }
-
-
     //! Nothing to do when going away
     function onHide()
     {
     }
-
     function drawTriangle(dc, angle, width, inner, length)
     {
         // Map out the coordinates
@@ -94,30 +65,6 @@ class ActivityClassicView extends Ui.WatchFace {
 
         // Draw the polygon
         dc.fillPolygon(result);
-    }
-
-    function drawLineFromMin(dc, min, width, inner, length, colour)
-    {
-        var angle = (min / 60.0) * Math.PI * 2;
-        // Map out the coordinates
-        var coords = [ [0,-inner], [0, -length] ];
-        var result = new [2];
-        var centerX = radius;
-        var centerY = radius;
-        var cos = Math.cos(angle);
-        var sin = Math.sin(angle);
-
-        // Transform the coordinates
-        for (var i = 0; i < 2; i += 1)
-        {
-            var x = (coords[i][0] * cos) - (coords[i][1] * sin);
-            var y = (coords[i][0] * sin) + (coords[i][1] * cos);
-            result[i] = [ centerX+x, centerY+y];
-        }
-
-        // Draw the Line
-        dc.setColor(colour,colour);
-        dc.drawLine(result[0][0],result[0][1],result[1][0],result[1][1]);
     }
 
     function drawBlock(dc, angle, width, inner, length)
@@ -145,111 +92,93 @@ class ActivityClassicView extends Ui.WatchFace {
     //! Draw the Hour hand
     function drawHourHand(dc, min)
     {
+        var cos = Math.cos(min);
+        var sin = Math.sin(min);
+        var centerX = radius;
+        var centerY = radius;
+
         // Map out the coordinates of the watch hand
-        var length = 46;
-        var width = 14;
-//        var start = 18;
+        var length = 50;
+        var width = 12;
         var start = 16;
 
         dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_BLACK);
-//        drawTriangle(dc, min, width, 0, start);// Draw the base Triangle
-//        drawBlock(dc, min, width, start, length);
-        drawBlock(dc, min, width, 0, length);
-        drawTriangle(dc, min, width+10, length+20, length);
-
-        // Fill the interior
+        drawBlock(dc, min, width, start, length);
+        // Draw the base Triangle
+        drawTriangle(dc, min, width, 0, start);
         dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
-        drawBlock(dc, min, width/2, start-2 , length);
-        drawTriangle(dc, min, width , length+16, length+2);
+        drawBlock(dc, min, width/3, start , length);
+
+        // Draw the arrowhead
+        dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_LT_GRAY);
+        drawTriangle(dc, min, width+8, length+20, length);
+        // Draw the Trimin
+        dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
+        drawTriangle(dc, min, width-2 , length+12, length+3);
+
     }
 
     function drawMinuteHand(dc, min)
     {
-        var length = 72;
+        var length = 74;
         var width = 10;
- //       var start = 16;
-        var start = 16;
-        dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        //drawTriangle(dc, min, width+2, 0, start);// Draw the base Triangle
-        //drawBlock(dc, min, width+2, start, length);
-        drawBlock(dc, min, width+2, 0, length);
-        drawTriangle(dc, min, 2+width*2 , length+24, length);
-
+        var start = 20;
         dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_LT_GRAY);
-//        drawTriangle(dc, min, width, 0, start);// Draw the base Triangle
-//        drawBlock(dc, min, width, start, length);
-        drawBlock(dc, min, width, 0, length);
-        drawTriangle(dc, min, width*2 , length+20, length);
+        drawBlock(dc, min, width, 20, length);
+        // Draw the base Triangle
+        drawTriangle(dc, min, width, 0, start);
 
         // Fill the interior
         dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
-        drawBlock(dc, min, width/2, start-2, length-1);
-        drawTriangle(dc, min, width, length+16, length+2);
+        drawBlock(dc, min, width/2, start, length);
+
+        // Draw the Triangle
+        dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_LT_GRAY);
+        drawTriangle(dc, min, width*2 , length+width*2, length);
+        // Draw the Triangle
+        dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
+        drawTriangle(dc, min, width, length+13, length+3);
     }
 
-    function drawSecondHandOld(dc,sec)
+    function drawSecondHand(dc,min)
     {
         var length = 82;
-        var width =  8;
-        var start = 20;
-        var angle  = ( sec / 60.0) * Math.PI * 2;
-        var reverse_angle  = angle -  Math.PI; // opposite angle
-
-        dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        drawBlock(dc, angle, width+2, 0, length+2);
-        drawBlock(dc, reverse_angle, width+2, 0, 3+length/3);
-        drawTriangle(dc, angle, 4+width*2 , length+2+width*2, length);
-
+        var width =  6;
+        var start = 10;
         dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_LT_GRAY);
-        drawBlock(dc, angle, width, 0, length);
-        drawBlock(dc, reverse_angle, width, 0, 3+length/3);
-        drawTriangle(dc, angle, 2+width*2 , length+20, length);
+        drawBlock(dc, min, width, 20, length);
+        // Draw the base Triangle
+        drawTriangle(dc, min, width, 0, 20);
 
         // Fill the interior
         dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
-        drawBlock(dc, angle, width/3, 0, length-2); // main
-        dc.fillCircle(radius, radius, 5);
-        drawBlock(dc, reverse_angle, width/3, 0, length/3);
-        drawTriangle(dc, angle, -6+2*width, length+14, length+2);
-    }
-    function drawSecondHand(dc,sec)
-    {
-        var length = 96;
-        var width =  4;
-        var start = 20;
-        var angle  = ( sec / 60.0) * Math.PI * 2;
-        var reverse_angle  = angle -  Math.PI; // opposite angle
+        drawBlock(dc, min, width/3, start, length);
 
-//        dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-//        drawBlock(dc, reverse_angle, width+2, 0, 2+length/3);
-//        drawTriangle(dc, angle, 4+width, length, 0);
-
-        // Fill the interior
-        dc.setColor(Gfx.COLOR_RED,Gfx.COLOR_WHITE);
-        dc.fillCircle(radius, radius, 5);
-        drawBlock(dc, reverse_angle, width, 0, length/4);
-        drawBlock(dc, angle, width, 0, 74);
-        drawTriangle(dc, angle, width, length, 74);
+        // Draw the Triangle
+        dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_LT_GRAY);
+        drawTriangle(dc, min, width*2 , 6+length+width*2, length);
+        // Draw the Triangle
+        dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
+        drawTriangle(dc, min, width, length+12, length+3);
     }
 
     function drawTwelve(dc)
     {
-        dc.setColor(Gfx.COLOR_LT_GRAY,Gfx.COLOR_LT_GRAY);
-        drawTriangle(dc, 0, 30, radius-49, radius-12);
-
-        dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
-        drawTriangle(dc, 0, 23, radius-44, radius-14);
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
+        drawTriangle(dc, 0, 24, radius-45, radius-12);
         if (Sys.getDeviceSettings().phoneConnected)
         {
-            dc.setColor(Gfx.COLOR_BLUE,Gfx.COLOR_BLUE);
-            drawTriangle(dc, 0,  12, radius-39, radius-17, Gfx.COLOR_BLUE);
+            dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_BLACK);
+            drawTriangle(dc, 0,  12, radius-38, radius-16 );
         }
         else
         {
             dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
-            dc.drawText(radius, 10 , Gfx.FONT_MEDIUM, "!", Gfx.TEXT_JUSTIFY_CENTER);
+//            dc.fillCircle(radius, 22, 6);
+//            dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+//            dc.drawText(radius, 8 , Gfx.FONT_SMALL, "-", Gfx.TEXT_JUSTIFY_CENTER); //
+            dc.drawText(radius,  9 , Gfx.FONT_MEDIUM, "!", Gfx.TEXT_JUSTIFY_CENTER);
         }
-        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
     }
 
 
@@ -264,7 +193,6 @@ class ActivityClassicView extends Ui.WatchFace {
     function onEnterSleep()
     {
         highPowerMode = false;
-        firstUpdateAfterSleep = true;
         Ui.requestUpdate();
     }
 
@@ -303,11 +231,6 @@ class ActivityClassicView extends Ui.WatchFace {
         var activityInfo;
         var bar_width = 8;
 
-        if (updateSettings) {
-          RetrieveSettings();
-          Ui.requestUpdate();
-        }
-
         activityInfo = Act.getInfo();
         //prevent divide by 0 if stepGoal is 0
         if( activityInfo != null && activityInfo.stepGoal == 0 )
@@ -318,18 +241,21 @@ class ActivityClassicView extends Ui.WatchFace {
         var now = Time.now();
         var info = Calendar.info(now, Time.FORMAT_LONG);
 
-        var dateStr = Lang.format("$1$$2$", [info.month, info.day]);
+        var dateStr = Lang.format("$1$ $2$", [info.month, info.day]);
         hour = ( ( ( clockTime.hour % 12 ) * 60 ) + clockTime.min );
+
         // ============================================================
         // Adjust the date position
-        switch_date = false;
-        if (SMART_DATE == true) {
-          if  ((hour >  160  && hour < 200) ||
-               (clockTime.min > 13 && clockTime.min < 17))
-          {
-              switch_date = true;
-          }
+        if  ((hour >  160  && hour < 200) ||
+             (clockTime.min > 13 && clockTime.min < 17))
+        {
+            switch_date = true;
         }
+        else
+        {
+            switch_date = false;
+        }
+
         // ============================================================
         // Clear the screen
         dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
@@ -340,8 +266,7 @@ class ActivityClassicView extends Ui.WatchFace {
         if (debug && activityInfo != null)
         {
             activityInfo.moveBarLevel = moveBarLevel/10;
-            moveBarLevel = moveBarLevel+1;
-            if (moveBarLevel == 60) { moveBarLevel=0;}
+            moveBarLevel++;
         }
         var bar_length = 9;
         if (activityInfo != null)
@@ -368,56 +293,36 @@ class ActivityClassicView extends Ui.WatchFace {
             }
         }
 
-        // ============================================================
-        // Draw the activity arc
-        if (activityInfo != null)
-        {
-            var progress = 1f*activityInfo.steps/activityInfo.stepGoal;
-            if (progress > 1)
+            // ============================================================
+            // Draw the activity arc
+            if (activityInfo != null)
             {
-                progress = 1;
-            }
-            drawSegment(dc, 30, 30-15*progress, Gfx.COLOR_BLUE );
-
-           // 12 hour mode - hide icons
-            if (SHOW_ICONS == false)
-            {
-              feetcolour = Gfx.COLOR_BLACK;
-            }
-            // else determin icon colour as long as we are not updating every second
-            // (results are unpredictable for steps in high power mode so just use previous color)
-            // (Also use last colour if we just dropped into low power mode)
-            else {
-              if (highPowerMode == false && firstUpdateAfterSleep == false)
-              {
-                if (activityInfo.steps-prevsteps >= 30) // steps per minute to be considered walking
+                var stepgoal = 50;
+                if (highPowerMode == true)
                 {
-                  feetcolour = Gfx.COLOR_BLUE;
+                    stepgoal = 1;
                 }
-                else
+                var feetcolour = Gfx.COLOR_LT_GRAY;
+                var progress = 1f*activityInfo.steps/activityInfo.stepGoal;
+                if (progress > 1)
                 {
-                  if (progress == 1)
-                  {
+                    progress = 1;
                     feetcolour = Gfx.COLOR_GREEN;
-                  }
-                  else
-                  {
-                    feetcolour = Gfx.COLOR_LT_GRAY;
-                  }
                 }
-              }
-              else
-              {
-                feetcolour = Gfx.COLOR_LT_GRAY;
-              }
+                drawSegment(dc, 30, 30-15*progress, Gfx.COLOR_BLUE );
+
+                if (!Sys.getDeviceSettings().is24Hour) // 12 hour - hide icons
+                {
+                  feetcolour = Gfx.COLOR_BLACK;
+                }
+                else if (activityInfo.steps-prevsteps >= stepgoal)
+                {
+                    feetcolour = Gfx.COLOR_BLUE;
+                }
+                dc.setColor(feetcolour ,feetcolour );
+                dc.fillRectangle(width*0.69, height*.71,25, 22); // colour feet
+                prevsteps = activityInfo.steps;
             }
-            dc.setColor(feetcolour ,feetcolour );
-            var step_icon_x = width*0.66;
-            var step_icon_y = height*.69;
-            dc.fillRectangle(step_icon_x-1, step_icon_y-2, 25, 22); // colour feet
-            prevsteps = activityInfo.steps;
-            firstUpdateAfterSleep = false;
-        }
 
         // ============================================================
         // Draw the battery arc
@@ -448,7 +353,7 @@ class ActivityClassicView extends Ui.WatchFace {
         }
         //
         // Draw battery icon with same colour as last battery segment
-        if (SHOW_ICONS)
+        if (Sys.getDeviceSettings().is24Hour)
         {
           if ( count > NUM_SEGMENTS ) { count = NUM_SEGMENTS ;}
           dc.setColor( segment_colour[count-1], segment_colour[count-1] );
@@ -457,9 +362,7 @@ class ActivityClassicView extends Ui.WatchFace {
         {
           dc.setColor( Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         }
-        var batt_icon_x = width*0.24;
-        var batt_icon_y = height*0.24;
-        dc.fillRectangle (batt_icon_x-1 , batt_icon_y-2 ,30, 22);
+        dc.fillRectangle(width*0.20, height*.21,30, 22);
 
         // ============================================================
         // Draw the background
@@ -467,17 +370,14 @@ class ActivityClassicView extends Ui.WatchFace {
 
         // ============================================================
         // Draw the Sleep icon
-
-        var sleep_move_icon_x = width*.23;
-        var sleep_move_icon_y = height*.70;
         if (activityInfo != null && activityInfo.isSleepMode  )
         {
             var dimensions =  dc.getTextDimensions(" zzZZ ",Gfx.FONT_XTINY);
             dc.setColor(Gfx.COLOR_DK_BLUE,Gfx.COLOR_TRANSPARENT);
-            dc.fillRoundedRectangle(sleep_move_icon_x, sleep_move_icon_y ,
+            dc.fillRoundedRectangle(width/5, height*.72,
                                     dimensions[0]+5, dimensions[1]-2, 4);
             dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-            dc.drawText(sleep_move_icon_x+3, sleep_move_icon_y -2,
+            dc.drawText(width/5+2, height*.72,
                         Gfx.FONT_XTINY, " zzZZ ", Gfx.TEXT_JUSTIFY_LEFT);
         }
         // Or the Move icon
@@ -485,10 +385,10 @@ class ActivityClassicView extends Ui.WatchFace {
         {
             var dimensions =  dc.getTextDimensions("Move!",Gfx.FONT_XTINY);
             dc.setColor(Gfx.COLOR_DK_RED,Gfx.COLOR_DK_RED);
-            dc.fillRoundedRectangle(sleep_move_icon_x, sleep_move_icon_y ,
+            dc.fillRoundedRectangle(width/5, height*.72,
                                     dimensions[0]+5, dimensions[1]-2, 4);
             dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-            dc.drawText(sleep_move_icon_x+3, sleep_move_icon_y-2 ,
+            dc.drawText(width/5+2, height*.71,
                         Gfx.FONT_XTINY, "Move!", Gfx.TEXT_JUSTIFY_LEFT);
         }
 
@@ -500,7 +400,7 @@ class ActivityClassicView extends Ui.WatchFace {
 
         // ============================================================
         // Draw the name
-        if (drawName == true)
+        if (1==2)
         {
         var d = dc.getTextDimensions(deviceName,Gfx.FONT_XTINY);
 //        dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
@@ -548,25 +448,19 @@ class ActivityClassicView extends Ui.WatchFace {
         min = ( clockTime.min / 60.0) * Math.PI * 2;
         drawMinuteHand(dc, min);
 
-
         // ============================================================
         // Draw the second hand
         if (highPowerMode == true)
         {
-          var sec  =  clockTime.sec;
+          var sec  = ( clockTime.sec / 60.0) * Math.PI * 2;
           drawSecondHand(dc, sec);
         }
-        else
-        {
-          // ============================================================
-          // Draw the inner circle
-          dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_BLACK);
-          dc.fillCircle(radius, radius, 7);
-          dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-          dc.drawCircle(radius, radius, 7 );
-        }
 
+        // ============================================================
+        // Draw the inner circle
+        dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_BLACK);
+        dc.fillCircle(width/2, height/2, 7);
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        dc.fillCircle(radius, radius, 2 );
+        dc.drawCircle(width/2, height/2, 7 );
     }
 }

@@ -2,6 +2,13 @@ using Toybox.Application as App;
 
 class ActivityClassicApp extends App.AppBase {
 
+    var view = null;
+
+    function onSettingsChanged() {
+      if (view != null) {
+        view.updateSettings = true;
+      }
+    }
     //! onStart() is called on application start up
     function onStart() {
     }
@@ -12,7 +19,8 @@ class ActivityClassicApp extends App.AppBase {
 
     //! Return the initial view of your application here
     function getInitialView() {
-        return [ new ActivityClassicView() ];
+        view = new ActivityClassicView();
+        return [ view ];
     }
 
 }
