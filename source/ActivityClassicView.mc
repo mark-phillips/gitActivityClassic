@@ -12,11 +12,13 @@ class ActivityClassicView extends Ui.WatchFace {
     var font;
     var background;
     var background_icons;
-    var deviceName;
     var highPowerMode = false;
     var deg2rad = Math.PI/180;
     var CLOCKWISE = -1;
     var COUNTERCLOCKWISE = 1;
+    var SCREEN_UNKNOWN = -1;
+    var SCREEN_ROUND = 0;
+    var SCREEN_SEMI_ROUND = 1;
     var moveBarLevel = 0 ;
     var radius = 0;
     var debug = false;
@@ -28,6 +30,10 @@ class ActivityClassicView extends Ui.WatchFace {
     var SHOW_ICONS = true;
     var SMART_DATE = true;
     var updateSettings = false;
+    var screen_width = -1;
+    var screen_height = -1;
+    var screen_type = SCREEN_UNKNOWN;
+    var ShowNotificationCount = true;
 
     //! Constructor
     function initialize()
@@ -40,7 +46,6 @@ class ActivityClassicView extends Ui.WatchFace {
     {
       font = Ui.loadResource(Rez.Fonts.id_font_black_diamond);
       background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
-      deviceName = Ui.loadResource(Rez.Strings.id_device_type);
     }
 
     function onShow()
@@ -77,10 +82,10 @@ class ActivityClassicView extends Ui.WatchFace {
     function drawTriangle(dc, angle, width, inner, length)
     {
         // Map out the coordinates
-        var coords = [ [0,-inner], [-(width/2), -length], [width/2, -length] ];
+        var coords = [ [0,-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length] ];
         var result = new [3];
-        var centerX = radius;
-        var centerY = radius;
+        var xcenter = screen_width/2;
+        var ycenter = screen_height/2;
         var cos = Math.cos(angle);
         var sin = Math.sin(angle);
 
@@ -89,7 +94,7 @@ class ActivityClassicView extends Ui.WatchFace {
         {
             var x = (coords[i][0] * cos) - (coords[i][1] * sin);
             var y = (coords[i][0] * sin) + (coords[i][1] * cos);
-            result[i] = [ centerX+x, centerY+y];
+            result[i] = [ xcenter+x, ycenter+y];
         }
 
         // Draw the polygon
@@ -102,8 +107,8 @@ class ActivityClassicView extends Ui.WatchFace {
         // Map out the coordinates
         var coords = [ [0,-inner], [0, -length] ];
         var result = new [2];
-        var centerX = radius;
-        var centerY = radius;
+        var xcenter = screen_width/2;
+        var ycenter = screen_height/2;
         var cos = Math.cos(angle);
         var sin = Math.sin(angle);
 
@@ -112,7 +117,7 @@ class ActivityClassicView extends Ui.WatchFace {
         {
             var x = (coords[i][0] * cos) - (coords[i][1] * sin);
             var y = (coords[i][0] * sin) + (coords[i][1] * cos);
-            result[i] = [ centerX+x, centerY+y];
+            result[i] = [ xcenter+x, ycenter+y];
         }
 
         // Draw the Line
@@ -123,10 +128,10 @@ class ActivityClassicView extends Ui.WatchFace {
     function drawBlock(dc, angle, width, inner, length)
     {
         // Map out the coordinates
-        var coords = [ [-(width/2),-inner], [-(width/2), -length], [width/2, -length], [width/2, -inner] ];
+        var coords = [ [-(adjustSemiRound(width)/2),-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length], [adjustSemiRound(width)/2, -inner] ];
         var result = new [4];
-        var centerX = radius;
-        var centerY = radius;
+        var xcenter = screen_width/2;
+        var ycenter = screen_height/2;
         var cos = Math.cos(angle);
         var sin = Math.sin(angle);
 
@@ -135,7 +140,7 @@ class ActivityClassicView extends Ui.WatchFace {
         {
             var x = (coords[i][0] * cos) - (coords[i][1] * sin);
             var y = (coords[i][0] * sin) + (coords[i][1] * cos);
-            result[i] = [ centerX+x, centerY+y];
+            result[i] = [ xcenter+x, ycenter+y];
         }
 
         // Draw the polygon
@@ -146,14 +151,12 @@ class ActivityClassicView extends Ui.WatchFace {
     function drawHourHand(dc, min)
     {
         // Map out the coordinates of the watch hand
-        var length = 46;
+        var length = adjustSemiRound(46);
         var width = 14;
 //        var start = 18;
         var start = 16;
 
         dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_BLACK);
-//        drawTriangle(dc, min, width, 0, start);// Draw the base Triangle
-//        drawBlock(dc, min, width, start, length);
         drawBlock(dc, min, width, 0, length);
         drawTriangle(dc, min, width+10, length+20, length);
 
@@ -165,7 +168,7 @@ class ActivityClassicView extends Ui.WatchFace {
 
     function drawMinuteHand(dc, min)
     {
-        var length = 72;
+        var length = adjustSemiRound(72);
         var width = 10;
  //       var start = 16;
         var start = 16;
@@ -189,7 +192,7 @@ class ActivityClassicView extends Ui.WatchFace {
 
     function drawSecondHandOld(dc,sec)
     {
-        var length = 82;
+        var length = adjustSemiRound(82);
         var width =  8;
         var start = 20;
         var angle  = ( sec / 60.0) * Math.PI * 2;
@@ -214,35 +217,34 @@ class ActivityClassicView extends Ui.WatchFace {
     }
     function drawSecondHand(dc,sec)
     {
-        var length = 96;
+        var length = adjustSemiRound(96);
+        var bodylength = adjustSemiRound(74);
         var width =  4;
         var start = 20;
         var angle  = ( sec / 60.0) * Math.PI * 2;
         var reverse_angle  = angle -  Math.PI; // opposite angle
-
-//        dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-//        drawBlock(dc, reverse_angle, width+2, 0, 2+length/3);
-//        drawTriangle(dc, angle, 4+width, length, 0);
+        var xcenter = screen_width/2;
+        var ycenter = screen_height/2;
 
         // Fill the interior
         dc.setColor(Gfx.COLOR_RED,Gfx.COLOR_WHITE);
-        dc.fillCircle(radius, radius, 5);
+        dc.fillCircle(xcenter, ycenter, 5);
         drawBlock(dc, reverse_angle, width, 0, length/4);
-        drawBlock(dc, angle, width, 0, 74);
-        drawTriangle(dc, angle, width, length, 74);
+        drawBlock(dc, angle, width, 0, bodylength);
+        drawTriangle(dc, angle, width, length, bodylength);
     }
 
     function drawTwelve(dc)
     {
         dc.setColor(Gfx.COLOR_LT_GRAY,Gfx.COLOR_LT_GRAY);
-        drawTriangle(dc, 0, 30, radius-49, radius-12);
+        drawTriangle(dc, 0, (30), radius-49, radius-12);
 
         dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
-        drawTriangle(dc, 0, 23, radius-44, radius-14);
+        drawTriangle(dc, 0, (23), radius-(44), radius-(14));
         if (Sys.getDeviceSettings().phoneConnected)
         {
             dc.setColor(Gfx.COLOR_BLUE,Gfx.COLOR_BLUE);
-            drawTriangle(dc, 0,  12, radius-39, radius-17, Gfx.COLOR_BLUE);
+            drawTriangle(dc, 0,  12, radius-(39), radius-(17), Gfx.COLOR_BLUE);
         }
         else
         {
@@ -275,8 +277,8 @@ class ActivityClassicView extends Ui.WatchFace {
     {
         var startangle = (180- startmin * 6 ) * deg2rad;
         var endangle = (180- endmin * 6 )  * deg2rad;
-        var xcenter = radius;
-        var ycenter = radius;
+        var xcenter = screen_width/2;
+        var ycenter = screen_height/2;
         var startx = xcenter + (50+ radius) * Math.sin(startangle);
         var starty = ycenter + (50+ radius) * Math.cos(startangle);
         var   endx = xcenter + (50+ radius) * Math.sin(  endangle);
@@ -288,15 +290,30 @@ class ActivityClassicView extends Ui.WatchFace {
         dc.setColor(colour,colour);
         dc.fillPolygon(coords);
     }
+    function adjustSemiRound(xvalue) {
+        if (screen_type == SCREEN_SEMI_ROUND) {
+            return (1.0 * xvalue * (170.0 / 218.0));
+        }
+        return xvalue;
+    }
 
     // ============================================================
     //! Handle the update event
     function onUpdate(dc)
     {
-        var width, height;
-        width = dc.getWidth();
-        height = dc.getHeight();
-        radius = height/2;
+        if (screen_type == SCREEN_UNKNOWN) {
+          screen_width = dc.getWidth();
+          screen_height = dc.getHeight();
+          if (screen_width == 218 and screen_height == 218) {
+            screen_type = SCREEN_ROUND;
+          }
+          else if (screen_width == 215 and screen_height == 180) {
+            screen_type = SCREEN_SEMI_ROUND;
+          }
+          radius = screen_height/2;
+        }
+        var xcenter = screen_width/2;
+        var ycenter = screen_height/2;
         var clockTime = Sys.getClockTime();
         var hour;
         var min;
@@ -334,7 +351,7 @@ class ActivityClassicView extends Ui.WatchFace {
         // ============================================================
         // Clear the screen
         dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
-        dc.fillRectangle(0,0,width, height);
+        dc.fillRectangle(0,0,screen_width, screen_height);
 
         // ============================================================
         // Draw the move bar
@@ -366,6 +383,16 @@ class ActivityClassicView extends Ui.WatchFace {
                         }
                     }
                 }
+            }
+        }
+
+        // ============================================================
+        // Draw the Notifications arc
+        if (ShowNotificationCount == true) {
+            var notificationCount = Sys.getDeviceSettings().notificationCount;
+            if (notificationCount > 0) {
+                notificationCount = (notificationCount > 15) ? 15 : notificationCount ;
+                drawSegment(dc, 0, notificationCount , Gfx.COLOR_PURPLE );
             }
         }
 
@@ -413,8 +440,8 @@ class ActivityClassicView extends Ui.WatchFace {
               }
             }
             dc.setColor(feetcolour ,feetcolour );
-            var step_icon_x = width*0.66;
-            var step_icon_y = height*.69;
+            var step_icon_x = screen_width*0.66;
+            var step_icon_y = screen_height*.69;
             dc.fillRectangle(step_icon_x-1, step_icon_y-2, 25, 22); // colour feet
             prevsteps = activityInfo.steps;
             firstUpdateAfterSleep = false;
@@ -458,9 +485,9 @@ class ActivityClassicView extends Ui.WatchFace {
         {
           dc.setColor( Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         }
-        var batt_icon_x = width*0.24;
-        var batt_icon_y = height*0.24;
-        dc.fillRectangle (batt_icon_x-1 , batt_icon_y-2 ,30, 22);
+        var batt_icon_x = screen_width*0.24;
+        var batt_icon_y = screen_height*0.24;
+        dc.fillRectangle (batt_icon_x-1 , batt_icon_y-2 ,40, 22);
 
         // ============================================================
         // Draw the background
@@ -469,8 +496,9 @@ class ActivityClassicView extends Ui.WatchFace {
         // ============================================================
         // Draw the Sleep icon
 
-        var sleep_move_icon_x = width*.23;
-        var sleep_move_icon_y = height*.70;
+        //var sleep_move_icon_x = screen_width - *.23;
+        var sleep_move_icon_x = screen_width - screen_width*.77;
+        var sleep_move_icon_y = screen_height*.70;
         if (activityInfo != null && activityInfo.isSleepMode  )
         {
             var dimensions =  dc.getTextDimensions(" zzZZ ",Gfx.FONT_XTINY);
@@ -497,45 +525,40 @@ class ActivityClassicView extends Ui.WatchFace {
         // Draw the numbers
         drawTwelve(dc);
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-        dc.drawText(width/2,height-45,font,"6", Gfx.TEXT_JUSTIFY_CENTER);
-
-        // ============================================================
-        // Draw the name
-        if (drawName == true)
-        {
-        var d = dc.getTextDimensions(deviceName,Gfx.FONT_XTINY);
-//        dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
-//        dc.drawText(-2+width* 0.80 -d[0]/2 ,-2+height*.21 , // drop shadow
-//                    Gfx.FONT_XTINY, deviceName, Gfx.TEXT_JUSTIFY_CENTER);
-        dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-        dc.drawText(width* 0.80 -d[0]/2 ,height*.21 ,
-                    Gfx.FONT_XTINY, deviceName, Gfx.TEXT_JUSTIFY_CENTER);
-        dc.drawText(width* 0.78 -d[0]/2 ,
-                    height*.19 + 14, Gfx.FONT_XTINY, "100m/330ft", Gfx.TEXT_JUSTIFY_CENTER);
+        var inset = 45;
+        if (screen_type == SCREEN_SEMI_ROUND) {
+          inset = 42;
+          font =  Gfx.FONT_LARGE;
         }
+        dc.drawText(screen_width/2,screen_height-inset,font,"6", Gfx.TEXT_JUSTIFY_CENTER);
         // ============================================================
         // Draw the date
         var date_pos = 0;
         var dimensions =  dc.getTextDimensions(dateStr,Gfx.FONT_SMALL);
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+        inset = 16;
+        if (screen_type == SCREEN_SEMI_ROUND) {
+          inset = 32;
+          font =  Gfx.FONT_LARGE;
+        }
         if (switch_date)
         {
-            date_pos = 20;
-            dc.drawText(width-22,-15+height/2,font, "3", Gfx.TEXT_JUSTIFY_RIGHT);
+            date_pos = inset;
+            dc.drawText(screen_width-(inset),-15+screen_height/2,font, "3", Gfx.TEXT_JUSTIFY_RIGHT);
         }
         else
         {
-            date_pos = width-22-dimensions[0];
-            dc.drawText(16,-15+height/2,font,"9",Gfx.TEXT_JUSTIFY_LEFT);
+            date_pos = screen_width-(inset+2)-dimensions[0];
+            dc.drawText((inset),-15+screen_height/2,font,"9",Gfx.TEXT_JUSTIFY_LEFT);
         }
         dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT); // drop shadow
-        dc.fillRoundedRectangle(date_pos-3, -dimensions[1]/2+height/2-2,
+        dc.fillRoundedRectangle(date_pos-3, -dimensions[1]/2+screen_height/2-2,
                                 dimensions[0]+4, dimensions[1]-2, 4);
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-        dc.fillRoundedRectangle(date_pos, -dimensions[1]/2+height/2,
+        dc.fillRoundedRectangle(date_pos, -dimensions[1]/2+screen_height/2,
                                 dimensions[0]+4, dimensions[1]-2, 4);
         dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_TRANSPARENT);
-        dc.drawText(date_pos+1, -dimensions[1]/2 -1 + height/2,
+        dc.drawText(date_pos+1, -dimensions[1]/2 -1 + screen_height/2,
                     Gfx.FONT_SMALL, dateStr, Gfx.TEXT_JUSTIFY_LEFT);
 
         // ============================================================
@@ -562,12 +585,12 @@ class ActivityClassicView extends Ui.WatchFace {
           // ============================================================
           // Draw the inner circle
           dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_BLACK);
-          dc.fillCircle(radius, radius, 7);
+          dc.fillCircle(xcenter, ycenter, 7);
           dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-          dc.drawCircle(radius, radius, 7 );
+          dc.drawCircle(xcenter, ycenter, 7 );
         }
 
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        dc.fillCircle(radius, radius, 2 );
+        dc.fillCircle(xcenter, ycenter, 2 );
     }
 }
