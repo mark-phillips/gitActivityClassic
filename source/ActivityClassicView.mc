@@ -8,32 +8,40 @@ using Toybox.Time.Gregorian as Calendar;
 using Toybox.WatchUi as Ui;
 
 class ActivityClassicView extends Ui.WatchFace {
-
+    var debug = false;
+    //
+    // Resources
     var font;
-    var background;
     var background_icons;
+    //
+    // Constants
     var highPowerMode = false;
-    var deg2rad = Math.PI/180;
+    var DEG2RAD = Math.PI/180;
     var CLOCKWISE = -1;
     var COUNTERCLOCKWISE = 1;
+
+    // Screen type constants
     var SCREEN_UNKNOWN = -1;
     var SCREEN_ROUND = 0;
     var SCREEN_SEMI_ROUND = 1;
-    var moveBarLevel = 0 ;
-    var radius = 0;
-    var debug = false;
+    //
+    // Global display state
     var switch_date = false;
+    var moveBarLevel = 0 ;
     var prevsteps = 0;
     var feetcolour = Gfx.COLOR_LT_GRAY;
     var firstUpdateAfterSleep = false;
-    var drawName = false;
-    var SHOW_ICONS = true;
-    var SMART_DATE = true;
     var updateSettings = false;
+    //
+    // Global instance vars
+    var radius = 0;
     var screen_width = -1;
     var screen_height = -1;
     var screen_type = SCREEN_UNKNOWN;
-    var ShowNotificationCount = true;
+    var NotificationCountVisible = false;
+    var NotificationCountColour = Gfx.COLOR_PURPLE;
+    var SHOW_ICONS = true;
+    var SMART_DATE = true;
 
     //! Constructor
     function initialize()
@@ -55,22 +63,26 @@ class ActivityClassicView extends Ui.WatchFace {
     // Pick up settings changes
     // rmdir /s /q %temp%\garmin
     function RetrieveSettings() {
-      SMART_DATE = Application.getApp().getProperty("SMART_DATE");
-      var icon_setting = Application.getApp().getProperty("SHOW_ICONS");
-      if (icon_setting == 0) {
-        if ( Sys.getDeviceSettings().is24Hour) {
-          SHOW_ICONS = true;
+        //
+        // Date positioning options
+        SMART_DATE = Application.getApp().getProperty("SMART_DATE");
+        //
+        // Icon visibiity options
+        var icon_setting = Application.getApp().getProperty("SHOW_ICONS");
+        if (icon_setting == 0) {
+            if ( Sys.getDeviceSettings().is24Hour) {
+                SHOW_ICONS = true;
+            }
+            else {
+                SHOW_ICONS = false;
+            }
         }
-        else {
-          SHOW_ICONS = false;
+        else  if (icon_setting == 1) {
+            SHOW_ICONS = true;
         }
-      }
-      else  if (icon_setting == 1) {
-        SHOW_ICONS = true;
-      }
-      else if (icon_setting == 2) {
-        SHOW_ICONS = false;
-      }
+        else if (icon_setting == 2) {
+            SHOW_ICONS = false;
+        }
     }
 
 
@@ -275,8 +287,8 @@ class ActivityClassicView extends Ui.WatchFace {
     // ============================================================
     function drawSegment(dc, startmin, endmin, colour)
     {
-        var startangle = (180- startmin * 6 ) * deg2rad;
-        var endangle = (180- endmin * 6 )  * deg2rad;
+        var startangle = (180- startmin * 6 ) * DEG2RAD;
+        var endangle = (180- endmin * 6 )  * DEG2RAD;
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
         var startx = xcenter + (50+ radius) * Math.sin(startangle);
@@ -388,7 +400,7 @@ class ActivityClassicView extends Ui.WatchFace {
 
         // ============================================================
         // Draw the Notifications arc
-        if (ShowNotificationCount == true) {
+        if (NotificationCountVisible == true) {
             var notificationCount = Sys.getDeviceSettings().notificationCount;
             if (notificationCount > 0) {
                 notificationCount = (notificationCount > 15) ? 15 : notificationCount ;
