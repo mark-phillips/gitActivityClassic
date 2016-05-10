@@ -313,6 +313,7 @@ class ActivityClassicView extends Ui.WatchFace {
     //! Handle the update event
     function onUpdate(dc)
     {
+        // First time in, work out screen constants
         if (screen_type == SCREEN_UNKNOWN) {
           screen_width = dc.getWidth();
           screen_height = dc.getHeight();
@@ -399,12 +400,15 @@ class ActivityClassicView extends Ui.WatchFace {
         }
 
         // ============================================================
-        // Draw the Notifications arc
+        // Draw the Notifications arc between 0 and the 15 minute marker
+        // To grab your attention when you have a single notification the watch
+        // draws an arc betweeen 12 and the 5 minute marker.  Each subsequent
+        // notification appears as another minute up to 15.
         if (NotificationCountVisible == true) {
             var notificationCount = Sys.getDeviceSettings().notificationCount;
             if (notificationCount > 0) {
-                notificationCount = (notificationCount > 15) ? 15 : notificationCount ;
-                drawSegment(dc, 0, notificationCount , Gfx.COLOR_PURPLE );
+                notificationCount = (notificationCount > 11) ? 11 : notificationCount ;
+                drawSegment(dc, 0, notificationCount+4 , NotificationCountColour );
             }
         }
 
