@@ -38,7 +38,7 @@ class ActivityClassicView extends Ui.WatchFace {
     var screen_width = -1;
     var screen_height = -1;
     var screen_type = SCREEN_UNKNOWN;
-    var NotificationCountVisible = false;
+    var NotificationCountVisible = true;
     var NotificationCountColour = Gfx.COLOR_PURPLE;
     var SHOW_ICONS = true;
     var SMART_DATE = true;
@@ -66,6 +66,9 @@ class ActivityClassicView extends Ui.WatchFace {
         //
         // Date positioning options
         SMART_DATE = Application.getApp().getProperty("SMART_DATE");
+        //
+        // Notification Count options
+        NotificationCountVisible = Application.getApp().getProperty("SHOW_NOTIFICATION_ARC");
         //
         // Icon visibiity options
         var icon_setting = Application.getApp().getProperty("SHOW_ICONS");
@@ -450,10 +453,10 @@ class ActivityClassicView extends Ui.WatchFace {
                   }
                 }
               }
-              else
-              {
-                feetcolour = Gfx.COLOR_LT_GRAY;
-              }
+              //else
+              //{
+              //  feetcolour = Gfx.COLOR_LT_GRAY;
+              //}
             }
             dc.setColor(feetcolour ,feetcolour );
             var step_icon_x = screen_width*0.66;

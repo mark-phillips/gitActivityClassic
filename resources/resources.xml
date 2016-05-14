@@ -5,33 +5,4 @@
 			filter="0123456789" />
 	</fonts>
 
-
-
-	<properties>
-		<property id="SHOW_ICONS" type="number">0</property>
-		<property id="SMART_DATE" type="boolean">true</property>
-	</properties>
-
-	<strings>
-		<string id="AppName">Activity Classic</string>
-		<string id="show_icons">Show icons? </string>
-		<string id="show_icons_as_time">If time format = 24 hour</string>
-		<string id="show_icons_true">True</string>
-		<string id="show_icons_false">False</string>
-		<string id="smart_date_desc">Smart date positioning? </string>
-	</strings>
-
-	<settings>
-		<setting propertyKey="@Properties.SHOW_ICONS" title="@Strings.show_icons">
-			<settingConfig type="list">
-				<listEntry value="0">@Strings.show_icons_as_time</listEntry>
-				<listEntry value="1">@Strings.show_icons_true</listEntry>
-				<listEntry value="2">@Strings.show_icons_false</listEntry>
-			</settingConfig>
-		</setting>
-		<setting propertyKey="@Properties.SMART_DATE" title="@Strings.smart_date_desc">
-			<settingConfig type="boolean" />
-		</setting>
-	</settings>
-
 </resources>
