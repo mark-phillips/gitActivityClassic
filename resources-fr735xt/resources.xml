@@ -1,5 +1,5 @@
 <resources>
-	<bitmap id="background_icons_id" filename="images/background-218x218-transparent-icons.png">
+	<bitmap id="background_icons_id" filename="images/background-215x180-transparent-icons.png">
 		<palette>
 			<color>FFFFFF</color>
 			<color>000000</color>

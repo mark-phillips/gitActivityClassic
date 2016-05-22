@@ -1,4 +1,5 @@
 using Toybox.Application as App;
+using Toybox.WatchUi as Ui;
 
 class ActivityClassicApp extends App.AppBase {
 
@@ -7,6 +8,7 @@ class ActivityClassicApp extends App.AppBase {
     function onSettingsChanged() {
       if (view != null) {
         view.updateSettings = true;
+        Ui.requestUpdate();
       }
     }
     //! onStart() is called on application start up

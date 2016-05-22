@@ -9,7 +9,7 @@
 		<property id="SHOW_ICONS" type="number">0</property>
 		<property id="SMART_DATE" type="boolean">true</property>
         <property id="SHOW_NOTIFICATION_ARC" type="boolean">true</property>
-<!--          <property id="NOTIFICATION_ARC_COLOUR" type="number">0</property> -->
+         <property id="NOTIFICATION_ARC_COLOUR" type="number">0</property> 
 	</properties>
 
 	<strings>
@@ -21,6 +21,17 @@
 		<string id="smart_date_desc">Smart date positioning? </string>
         <string id="show_notification_arc">Show notification arc? </string>
         <string id="Notification_arc_colour">Notification arc colour? </string>
+        
+       <string id="LT_GRAY">Light gray</string>
+       <string id="DK_GRAY">Dark gray</string>
+       <string id="RED">Red</string>
+       <string id="DK_RED">Dark Red</string>
+       <string id="ORANGE">Orange</string>
+       <string id="PINK">Pink</string>
+       <string id="YELLOW">Yellow</string>
+       <string id="PURPLE">Purple</string>
+       <string id="DK_GREEN">Dark Green</string>
+       <string id="DK_BLUE">Dark Blue</string>        
 	</strings>
 
 	<settings>
@@ -37,6 +48,20 @@
         <setting propertyKey="@Properties.SHOW_NOTIFICATION_ARC" title="@Strings.show_notification_arc">
             <settingConfig type="boolean" />
         </setting>	
+        <setting propertyKey="@Properties.NOTIFICATION_ARC_COLOUR" title="@Strings.Notification_arc_colour">
+            <settingConfig type="list">
+                <listEntry value="11184810">@Rez.Strings.LT_GRAY</listEntry>
+                <listEntry value="5592405">@Rez.Strings.DK_GRAY</listEntry>
+                <listEntry value="16711680">@Rez.Strings.RED</listEntry>
+                <listEntry value="11141120">@Rez.Strings.DK_RED</listEntry>
+                <listEntry value="16733440">@Rez.Strings.ORANGE</listEntry>
+                <listEntry value="16711935">@Rez.Strings.PINK</listEntry>
+                <listEntry value="16755200">@Rez.Strings.YELLOW</listEntry>
+                <listEntry value="11141375">@Rez.Strings.PURPLE</listEntry>
+                <listEntry value="43520">@Rez.Strings.DK_GREEN</listEntry>
+                <listEntry value="255">@Rez.Strings.DK_BLUE</listEntry>
+            </settingConfig>         
+        </setting>                
     </settings>
 
 </resources>

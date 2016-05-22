@@ -9,6 +9,8 @@ using Toybox.WatchUi as Ui;
 
 class ActivityClassicView extends Ui.WatchFace {
     var debug = false;
+    var trace = true;
+    var trace_indent = 0;
     //
     // Resources
     var font;
@@ -46,14 +48,18 @@ class ActivityClassicView extends Ui.WatchFace {
     //! Constructor
     function initialize()
     {
+      if (trace) { trace_entry("initialize","none"); }
       RetrieveSettings() ;
+      if (trace) { trace_exit("initialize"); }
     }
 
     //! Load resources
     function onLayout()
     {
+      if (trace) { trace_entry("onLayout","none"); }
       font = Ui.loadResource(Rez.Fonts.id_font_black_diamond);
       background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
+      if (trace) { trace_exit("onLayout"); }
     }
 
     function onShow()
@@ -63,12 +69,15 @@ class ActivityClassicView extends Ui.WatchFace {
     // Pick up settings changes
     // rmdir /s /q %temp%\garmin
     function RetrieveSettings() {
+      if (trace) { trace_entry("RetrieveSettings","none"); }
         //
         // Date positioning options
         SMART_DATE = Application.getApp().getProperty("SMART_DATE");
         //
         // Notification Count options
         NotificationCountVisible = Application.getApp().getProperty("SHOW_NOTIFICATION_ARC");
+        NotificationCountColour = Application.getApp().getProperty("NOTIFICATION_ARC_COLOUR");
+        if (trace) { trace_data("NotificationCountVisible  " + NotificationCountVisible  + "Colour: " + NotificationCountColour ); }
         //
         // Icon visibiity options
         var icon_setting = Application.getApp().getProperty("SHOW_ICONS");
@@ -86,6 +95,7 @@ class ActivityClassicView extends Ui.WatchFace {
         else if (icon_setting == 2) {
             SHOW_ICONS = false;
         }
+      if (trace) { trace_exit("RetrieveSettings"); }
     }
 
 
@@ -274,15 +284,19 @@ class ActivityClassicView extends Ui.WatchFace {
 
     function onExitSleep()
     {
+      if (trace) { trace_entry("onExitSleep","none"); }
         highPowerMode = true;
         Ui.requestUpdate();
+      if (trace) { trace_exit("onExitSleep"); }
     }
 
     function onEnterSleep()
     {
+      if (trace) { trace_entry("onEnterSleep","none"); }
         highPowerMode = false;
         firstUpdateAfterSleep = true;
         Ui.requestUpdate();
+      if (trace) { trace_exit("onEnterSleep"); }
     }
 
     // ============================================================
@@ -316,6 +330,7 @@ class ActivityClassicView extends Ui.WatchFace {
     //! Handle the update event
     function onUpdate(dc)
     {
+      if (trace) { trace_entry("onUpdate","none"); }
         // First time in, work out screen constants
         if (screen_type == SCREEN_UNKNOWN) {
           screen_width = dc.getWidth();
@@ -411,7 +426,7 @@ class ActivityClassicView extends Ui.WatchFace {
             var notificationCount = Sys.getDeviceSettings().notificationCount;
             if (notificationCount > 0) {
                 notificationCount = (notificationCount > 11) ? 11 : notificationCount ;
-                drawSegment(dc, 0, notificationCount+4 , NotificationCountColour );
+                drawSegment(dc, 0, 4+(notificationCount-1)+0.7  , NotificationCountColour );
             }
         }
 
@@ -611,5 +626,37 @@ class ActivityClassicView extends Ui.WatchFace {
 
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         dc.fillCircle(xcenter, ycenter, 2 );
+      if (trace) { trace_exit("onUpdate"); }
+    }
+    //
+    // Trace methods
+    function trace_data(data) {
+        print_trace_time();
+        print_trace_indent(trace_indent);
+        System.println( "d " + data);
+    }
+    function trace_entry(method, parms) {
+        trace_indent++;
+        print_trace_time();
+        print_trace_indent(trace_indent);
+        System.println( "> " + method + "()" + "[" + parms + "]");
+    }
+    function trace_exit(method) {
+        print_trace_time();
+        print_trace_indent(trace_indent);
+        System.println( "< " + method + "()");
+        trace_indent--;
+    }
+    function print_trace_time() {
+        var clockTime = Sys.getClockTime();
+        System.print( clockTime.hour + ":" + clockTime.min + ":" + clockTime.sec +  "  " + System.getTimer() +"  ");
+
+    }
+    function print_trace_indent(trace_indent) {
+        var indent_string = "";
+        for (var c=0; c<trace_indent; c++) {
+            indent_string = indent_string + "-";
+        }
+        System.print(indent_string);
     }
 }

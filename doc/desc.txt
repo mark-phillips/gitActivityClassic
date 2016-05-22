@@ -8,6 +8,8 @@ Features include:
 
 - Top left quadrant:- Green/Orange/Red arc shows battery charge status.
 
+- Top right quadrant:- Arc which shows count of unread notifications.  The first notification appears as a single bar between 1-5 minutes.  Each subsequent notification adds an arc with 1 minute width.  The arc can be disableds in settings, and colour can be selected.    
+
 - Bottom right quadrant:- Blue arc shows steps indicating progress towards daily goal.
 
 - Bottom left quadrant:- Red arc shows move bar: triggered when it is time to move.
@@ -23,6 +25,9 @@ Features include:
 
 Version history:
 
+v1.5 - Add support for fr735xt and d2bravo_titanium.
+     - Add notification arc.  Thanks to Milos Herman for the suggestion.  
+       
 v1.1 - Changed layout for improved readabilty in poor light
 v1.0 - Initial release (available from: https://www.dropbox.com/s/aub5zlx1h5kueko/ActivityClassicv1.0.prg?dl=0 - can be side loaded by connecting watch to PC and copying the prg to \GARM\APPS) 
 
