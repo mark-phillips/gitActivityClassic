@@ -8,7 +8,7 @@ Features include:
 
 - Top left quadrant:- Green/Orange/Red arc shows battery charge status.
 
-- Top right quadrant:- Arc which shows count of unread notifications.  The first notification appears as a single bar between 1-5 minutes.  Each subsequent notification adds an arc with 1 minute width.  The arc can be disableds in settings, and colour can be selected.    
+- Top right quadrant:- Arc which shows count of unread notifications.  It's easy to miss the first notification, so the first notification appears as a large bar between 1-5 minutes.  Each subsequent notification appears as an additional 1 minute segment.  The arc can be disabled and colour can be selected in the watch settings.    
 
 - Bottom right quadrant:- Blue arc shows steps indicating progress towards daily goal.
 

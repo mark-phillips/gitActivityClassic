@@ -8,8 +8,11 @@ using Toybox.Time.Gregorian as Calendar;
 using Toybox.WatchUi as Ui;
 
 class ActivityClassicView extends Ui.WatchFace {
-    var debug = false;
-    var trace = true;
+    // To make is quicker to grab screenshots with move arc set the following
+    // to true
+    var increment_move_arc = false;
+    // To turn on trace set the following to true
+    var trace = false;
     var trace_indent = 0;
     //
     // Resources
@@ -268,8 +271,8 @@ class ActivityClassicView extends Ui.WatchFace {
         drawTriangle(dc, 0, (23), radius-(44), radius-(14));
         if (Sys.getDeviceSettings().phoneConnected)
         {
-            dc.setColor(Gfx.COLOR_BLUE,Gfx.COLOR_BLUE);
-            drawTriangle(dc, 0,  12, radius-(39), radius-(17), Gfx.COLOR_BLUE);
+            dc.setColor(Gfx.COLOR_DK_BLUE,Gfx.COLOR_DK_BLUE);
+            drawTriangle(dc, 0,  14, radius-(39), radius-(17));
         }
         else
         {
@@ -354,7 +357,6 @@ class ActivityClassicView extends Ui.WatchFace {
         if (updateSettings) {
           RetrieveSettings();
           updateSettings = false;
-          //Ui.requestUpdate();
         }
 
         activityInfo = Act.getInfo();
@@ -365,9 +367,9 @@ class ActivityClassicView extends Ui.WatchFace {
         }
 
         var now = Time.now();
-        var info = Calendar.info(now, Time.FORMAT_LONG);
+        var calendar_info = Calendar.info(now, Time.FORMAT_LONG);
 
-        var dateStr = Lang.format("$1$$2$", [info.month, info.day]);
+        var dateStr = Lang.format("$1$$2$", [calendar_info.month, calendar_info.day]);
         hour = ( ( ( clockTime.hour % 12 ) * 60 ) + clockTime.min );
         // ============================================================
         // Adjust the date position
@@ -386,7 +388,7 @@ class ActivityClassicView extends Ui.WatchFace {
 
         // ============================================================
         // Draw the move bar
-        if (debug && activityInfo != null)
+        if (increment_move_arc && activityInfo != null)
         {
             activityInfo.moveBarLevel = moveBarLevel/10;
             moveBarLevel = moveBarLevel+1;
