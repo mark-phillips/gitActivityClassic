@@ -12,7 +12,7 @@ class ActivityClassicView extends Ui.WatchFace {
     // to true
     var increment_move_arc = false;
     // To turn on trace set the following to true
-    var trace = false;
+    var trace = true;
     var trace_indent = 0;
     //
     // Resources
@@ -29,6 +29,11 @@ class ActivityClassicView extends Ui.WatchFace {
     var SCREEN_UNKNOWN = -1;
     var SCREEN_ROUND = 0;
     var SCREEN_SEMI_ROUND = 1;
+
+    // date format constants
+    var DATE_MONTH = 0;
+    var DATE_DAY_OF_WEEK = 1;
+    var DATE_ALTERNATE = 2;
     //
     // Global display state
     var switch_date = false;
@@ -37,6 +42,7 @@ class ActivityClassicView extends Ui.WatchFace {
     var feetcolour = Gfx.COLOR_LT_GRAY;
     var firstUpdateAfterSleep = false;
     var updateSettings = false;
+    var use3d = true;
     //
     // Global instance vars
     var radius = 0;
@@ -47,12 +53,26 @@ class ActivityClassicView extends Ui.WatchFace {
     var NotificationCountColour = Gfx.COLOR_PURPLE;
     var SHOW_ICONS = true;
     var SMART_DATE = true;
-
+    var DATE_FORMAT = 0;
+    var PREVIOUS_MIN = -1;
+    var ARROW = 1;
+    var POINTER = 1;
+    var SWORD= 2;
+    var HourHandStyle = ARROW;
+    var MinuteHandStyle = ARROW;
+    var SecondHandStyle = POINTER;
     //! Constructor
     function initialize()
     {
       if (trace) { trace_entry("initialize","none"); }
       RetrieveSettings() ;
+            font = Ui.loadResource(Rez.Fonts.id_font_black_diamond);
+      if (use3d) {
+        background_icons = Ui.loadResource(Rez.Drawables.background_icons_3d_id); //
+      }
+      else {
+        background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
+      }
       if (trace) { trace_exit("initialize"); }
     }
 
@@ -60,13 +80,14 @@ class ActivityClassicView extends Ui.WatchFace {
     function onLayout()
     {
       if (trace) { trace_entry("onLayout","none"); }
-      font = Ui.loadResource(Rez.Fonts.id_font_black_diamond);
-      background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
+
       if (trace) { trace_exit("onLayout"); }
     }
 
     function onShow()
     {
+      if (trace) { trace_entry("onShow","none"); }
+      if (trace) { trace_exit("onShow"); }
     }
 
     // Pick up settings changes
@@ -76,6 +97,7 @@ class ActivityClassicView extends Ui.WatchFace {
         //
         // Date positioning options
         SMART_DATE = Application.getApp().getProperty("SMART_DATE");
+        DATE_FORMAT = Application.getApp().getProperty("DATE_FORMAT");
         //
         // Notification Count options
         NotificationCountVisible = Application.getApp().getProperty("SHOW_NOTIFICATION_ARC");
@@ -98,6 +120,10 @@ class ActivityClassicView extends Ui.WatchFace {
         else if (icon_setting == 2) {
             SHOW_ICONS = false;
         }
+
+      //background_icons = Ui.loadResource(Rez.Drawables.background_icons_3d_id);
+      //Ui.loadResource(Rez.Drawables.background_icons_id);
+
       if (trace) { trace_exit("RetrieveSettings"); }
     }
 
@@ -107,10 +133,9 @@ class ActivityClassicView extends Ui.WatchFace {
     {
     }
 
-    function drawTriangle(dc, angle, width, inner, length)
+    function drawTriangleImpl(dc, angle,  coords)
     {
         // Map out the coordinates
-        var coords = [ [0,-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length] ];
         var result = new [3];
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
@@ -129,34 +154,36 @@ class ActivityClassicView extends Ui.WatchFace {
         dc.fillPolygon(result);
     }
 
-    function drawLineFromMin(dc, min, width, inner, length, colour)
+    function drawTriangle(dc, angle, width, inner, length)
     {
-        var angle = (min / 60.0) * Math.PI * 2;
         // Map out the coordinates
-        var coords = [ [0,-inner], [0, -length] ];
-        var result = new [2];
-        var xcenter = screen_width/2;
-        var ycenter = screen_height/2;
-        var cos = Math.cos(angle);
-        var sin = Math.sin(angle);
-
-        // Transform the coordinates
-        for (var i = 0; i < 2; i += 1)
-        {
-            var x = (coords[i][0] * cos) - (coords[i][1] * sin);
-            var y = (coords[i][0] * sin) + (coords[i][1] * cos);
-            result[i] = [ xcenter+x, ycenter+y];
-        }
-
-        // Draw the Line
-        dc.setColor(colour,colour);
-        dc.drawLine(result[0][0],result[0][1],result[1][0],result[1][1]);
+        var coords = [ [0,-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length] ];
+        drawTriangleImpl(dc, angle, coords);
     }
 
-    function drawBlock(dc, angle, width, inner, length)
+    function drawTriangle3d(dc, angle, width, inner, length, light_colour, dark_colour)
     {
-        // Map out the coordinates
-        var coords = [ [-(adjustSemiRound(width)/2),-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length], [adjustSemiRound(width)/2, -inner] ];
+      if (trace) { trace_entry("drawTriangle3d","none"); }
+
+        var colour1 = dark_colour;
+        var colour2 = light_colour;
+        if (trace) { trace_data("angle" + angle); }
+        if (angle > 3.14159) {  // after 180 degrees (in rads), switch shadow
+            colour1 = light_colour;
+            colour2 = dark_colour;
+        }
+        var coords = [ [0,-inner], [-(adjustSemiRound(width)/2), -length], [0, -length] ];
+        dc.setColor(colour1,colour1);
+        drawTriangleImpl(dc, angle, coords);
+        coords = [ [0,-inner], [0, -length], [adjustSemiRound(width)/2, -length] ];
+        dc.setColor(colour2,colour2);
+        drawTriangleImpl(dc, angle, coords);
+
+        if (trace) { trace_exit("drawTriangle3d"); }
+    }
+
+    function drawBlockImpl(dc, angle, coords)
+    {
         var result = new [4];
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
@@ -174,43 +201,101 @@ class ActivityClassicView extends Ui.WatchFace {
         // Draw the polygon
         dc.fillPolygon(result);
     }
+    function drawBlock(dc, angle, width, inner, length)
+    {
+        // Map out the coordinates
+        var coords = [ [-(adjustSemiRound(width)/2),-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length], [adjustSemiRound(width)/2, -inner] ];
+        drawBlockImpl(dc,angle,coords);
+    }
 
-    //! Draw the Hour hand
-    function drawHourHand(dc, min)
+    // ============================================================
+    // Draw 3d Block
+    // ============================================================
+    function drawBlock3d(dc, angle, width, inner, length, light_colour, dark_colour)
+    {
+        var colour1 = dark_colour;
+        var colour2 = light_colour;
+        if (angle > 3.14159) {  // after minute 30, switch shadow
+            colour1 = light_colour;
+            colour2 = dark_colour;
+        }
+        var coords = [ [-(adjustSemiRound(width)/2),-inner], [-(adjustSemiRound(width)/2), -length], [0, -length], [0, -inner] ];
+        dc.setColor(colour1,colour1);
+        drawBlockImpl(dc,angle,coords);
+        coords = [ [0,-inner], [0, -length], [adjustSemiRound(width)/2, -length], [adjustSemiRound(width)/2, -inner] ];
+        dc.setColor(colour2,colour2);
+        drawBlockImpl(dc,angle,coords);
+    }
+
+    function drawArrowHand(dc,min,length,arrowLength, width, start)
     {
         // Map out the coordinates of the watch hand
-        var length = adjustSemiRound(46);
-        var width = 14;
-//        var start = 18;
-        var start = 16;
 
+        // Black outline
+        dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
+        drawBlock(dc, min, width+2, 0, length+2);
+        drawTriangle(dc, min, 2+width*2 , length+arrowLength+2, length);
+
+        // Draw hand
         dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_BLACK);
-        drawBlock(dc, min, width, 0, length);
-        drawTriangle(dc, min, width+10, length+20, length);
+        if (use3d) {
+            drawBlock3d(dc, min, width, 0, length, Gfx.COLOR_LT_GRAY, Gfx.COLOR_DK_GRAY);
+            drawTriangle3d(dc, min, width+(arrowLength/2), length+arrowLength,length, Gfx.COLOR_LT_GRAY, Gfx.COLOR_DK_GRAY);
+        }
+        else {
+            drawBlock(dc, min, width, 0, length);
+            drawTriangle(dc, min, width+(arrowLength/2), length+arrowLength, length);
+
+        }
 
         // Fill the interior
-        dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
-        drawBlock(dc, min, width/2, start-2 , length);
-        drawTriangle(dc, min, width , length+16, length+2);
+          dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
+          drawBlock(dc, min, width/2, start-2 , length);
+          drawTriangle(dc, min, width , length+arrowLength*.6, length+2);
+   //     }
+
     }
 
     function drawMinuteHand(dc, min)
     {
         var length = adjustSemiRound(72);
         var width = 10;
- //       var start = 16;
+        var arrowLength = 20;
+        var start = 16;
+        //drawMinuteHandArrow2D(dc,min);
+        drawArrowHand(dc,min,length,arrowLength,width,start);
+    }
+
+    //! Draw the Hour hand
+    function drawHourHand(dc, min)
+    {
+        var length = adjustSemiRound(46);
+        var width = 14;
+        var start = 16;
+        var arrowLength = 20;
+        if (HourHandStyle == ARROW) {
+            drawArrowHand(dc,min,length,arrowLength,width,start);
+        }
+        else if (HourHandStyle == POINTER) {
+        }
+        else {
+        }
+    }
+    function drawMinuteHandArrow2D(dc, min)
+    {
+        var length = adjustSemiRound(72);
+        var width = 10;
+        var arrowLength = 20;
         var start = 16;
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        //drawTriangle(dc, min, width+2, 0, start);// Draw the base Triangle
-        //drawBlock(dc, min, width+2, start, length);
+        // Black outline
         drawBlock(dc, min, width+2, 0, length);
-        drawTriangle(dc, min, 2+width*2 , length+24, length);
+        drawTriangle(dc, min, 2+width*2 , length+arrowLength+4, length);
 
         dc.setColor(Gfx.COLOR_DK_GRAY,Gfx.COLOR_LT_GRAY);
-//        drawTriangle(dc, min, width, 0, start);// Draw the base Triangle
-//        drawBlock(dc, min, width, start, length);
-        drawBlock(dc, min, width, 0, length);
-        drawTriangle(dc, min, width*2 , length+20, length);
+        drawBlock3d(dc, min, width, 0, length, Gfx.COLOR_LT_GRAY, Gfx.COLOR_DK_GRAY);
+//        drawBlock(dc, min, width, 0, length);
+        drawTriangle(dc, min, width*2 , length+arrowLength, length);
 
         // Fill the interior
         dc.setColor(Gfx.COLOR_WHITE,Gfx.COLOR_WHITE);
@@ -243,6 +328,7 @@ class ActivityClassicView extends Ui.WatchFace {
         drawBlock(dc, reverse_angle, width/3, 0, length/3);
         drawTriangle(dc, angle, -6+2*width, length+14, length+2);
     }
+
     function drawSecondHand(dc,sec)
     {
         var length = adjustSemiRound(96);
@@ -277,12 +363,10 @@ class ActivityClassicView extends Ui.WatchFace {
         else
         {
             dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
-            dc.drawText(radius, 10 , Gfx.FONT_MEDIUM, "!", Gfx.TEXT_JUSTIFY_CENTER);
+            dc.drawText(screen_width/2, 10 , Gfx.FONT_MEDIUM, "!", Gfx.TEXT_JUSTIFY_CENTER);
         }
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
     }
-
-
 
 
     function onExitSleep()
@@ -346,6 +430,7 @@ class ActivityClassicView extends Ui.WatchFace {
           }
           radius = screen_height/2;
         }
+
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
         var clockTime = Sys.getClockTime();
@@ -367,9 +452,30 @@ class ActivityClassicView extends Ui.WatchFace {
         }
 
         var now = Time.now();
-        var calendar_info = Calendar.info(now, Time.FORMAT_LONG);
+        var calendar_info = Calendar.info(now, Time.FORMAT_MEDIUM);
 
-        var dateStr = Lang.format("$1$$2$", [calendar_info.month, calendar_info.day]);
+        //
+        // Compute the date string & location
+        var dateStr = "";
+        var date_type = DATE_FORMAT;
+        //
+        // Handle alternating date formats
+        if (DATE_FORMAT == DATE_ALTERNATE ) {
+            if ( clockTime.min % 2 == 0 ) {
+                date_type = DATE_DAY_OF_WEEK;
+            }
+            else {
+                date_type = DATE_MONTH;
+            }
+        }
+        //
+        // Now get the date string
+        if (date_type == DATE_MONTH) {
+            dateStr = Lang.format("$1$$2$", [calendar_info.month, calendar_info.day]);
+        }
+        else {
+            dateStr = Lang.format("$1$$2$", [calendar_info.day_of_week, calendar_info.day]);
+        }
         hour = ( ( ( clockTime.hour % 12 ) * 60 ) + clockTime.min );
         // ============================================================
         // Adjust the date position
@@ -381,6 +487,7 @@ class ActivityClassicView extends Ui.WatchFace {
               switch_date = true;
           }
         }
+
         // ============================================================
         // Clear the screen
         dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
@@ -388,36 +495,7 @@ class ActivityClassicView extends Ui.WatchFace {
 
         // ============================================================
         // Draw the move bar
-        if (increment_move_arc && activityInfo != null)
-        {
-            activityInfo.moveBarLevel = moveBarLevel/10;
-            moveBarLevel = moveBarLevel+1;
-            if (moveBarLevel == 60) { moveBarLevel=0;}
-        }
-        var bar_length = 9;
-        if (activityInfo != null)
-        {
-            if (activityInfo.moveBarLevel > 0 )
-            {
-                drawSegment(dc,   30,35  , Gfx.COLOR_RED );
-                if (activityInfo.moveBarLevel >1 )
-                {
-                      drawSegment(dc,   35.5,37.5, Gfx.COLOR_RED );
-                    if (activityInfo.moveBarLevel >2 )
-                    {
-                          drawSegment(dc,   38,40  , Gfx.COLOR_RED );
-                        if (activityInfo.moveBarLevel >3 )
-                        {
-                              drawSegment(dc,   40.5,42.5  , Gfx.COLOR_RED );
-                            if (activityInfo.moveBarLevel >4 )
-                            {
-                                  drawSegment(dc,   43,45  , Gfx.COLOR_RED );
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        drawMoveBar(dc,activityInfo);
 
         // ============================================================
         // Draw the Notifications arc between 0 and the 15 minute marker
@@ -628,9 +706,44 @@ class ActivityClassicView extends Ui.WatchFace {
 
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         dc.fillCircle(xcenter, ycenter, 2 );
+
+      PREVIOUS_MIN = clockTime.min;
       if (trace) { trace_exit("onUpdate"); }
     }
-    //
+
+    // Draw move bar
+    function drawMoveBar(dc,activityInfo) {
+        if (increment_move_arc && activityInfo != null)
+        {
+            activityInfo.moveBarLevel = moveBarLevel/10;
+            moveBarLevel = moveBarLevel+1;
+            if (moveBarLevel == 60) { moveBarLevel=0;}
+        }
+        var bar_length = 9;
+        if (activityInfo != null)
+        {
+            if (activityInfo.moveBarLevel > 0 )
+            {
+                drawSegment(dc,   30,35  , Gfx.COLOR_RED );
+                if (activityInfo.moveBarLevel >1 )
+                {
+                      drawSegment(dc,   35.5,37.5, Gfx.COLOR_RED );
+                    if (activityInfo.moveBarLevel >2 )
+                    {
+                          drawSegment(dc,   38,40  , Gfx.COLOR_RED );
+                        if (activityInfo.moveBarLevel >3 )
+                        {
+                              drawSegment(dc,   40.5,42.5  , Gfx.COLOR_RED );
+                            if (activityInfo.moveBarLevel >4 )
+                            {
+                                  drawSegment(dc,   43,45  , Gfx.COLOR_RED );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }    //
     // Trace methods
     function trace_data(data) {
         print_trace_time();

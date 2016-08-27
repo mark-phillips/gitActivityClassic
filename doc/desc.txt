@@ -24,7 +24,8 @@ Features include:
 
 
 Version history:
-
+v1.6 - Add support for "day of week"/"day" or "month"/"day" date formats.  Use the Garmin Connect mobile app to select you preferred date format.  Thanks to Peterhillergard for the suggestion.  
+     - Fix formatting bug when bluetooth disconnected on semi-round watches   
 v1.5 - Add support for fr735xt and d2bravo_titanium.
      - Add notification arc.  Thanks to Milos Herman for the suggestion.  
        

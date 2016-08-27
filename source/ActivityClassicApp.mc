@@ -8,7 +8,7 @@ class ActivityClassicApp extends App.AppBase {
     function onSettingsChanged() {
       if (view != null) {
         view.updateSettings = true;
-        Ui.requestUpdate();
+        //Ui.requestUpdate();
       }
     }
     //! onStart() is called on application start up
