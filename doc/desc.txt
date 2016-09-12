@@ -14,6 +14,12 @@ Features include:
 
 - Bottom left quadrant:- Red arc shows move bar: triggered when it is time to move.
 
+- Optional UTC hand with large circle and configurable highlight colour
+     
+- Optional moon phase indicator in place of numeral 6 or 9.
+
+- Configurable second-hand style (arrow or pointer).
+
 - Switch between simple and advanced display using the 12/24hour system time setting. (The battery and steps icons are hidden in 12 hour mode).
 
 - Triangle at 12 o'clock indicates phone connection status: A blue triangle when the phone is connected and a red exclamation mark when disconnected.
@@ -24,11 +30,14 @@ Features include:
 
 
 Version history:
+v2.0 - Added optional UTC hand with large circle and configurable highlight colour
+     - New optional moon phase indicator in place of numeral 6 or 9.
+     - New configurable second-hand style (arrow or pointer) 
+     - New "3d" look to hands and dial      
 v1.6 - Add support for "day of week"/"day" or "month"/"day" date formats.  Use the Garmin Connect mobile app to select you preferred date format.  Thanks to Peterhillergard for the suggestion.  
      - Fix formatting bug when bluetooth disconnected on semi-round watches   
 v1.5 - Add support for fr735xt and d2bravo_titanium.
-     - Add notification arc.  Thanks to Milos Herman for the suggestion.  
-       
+     - Add notification arc.  Thanks to Milos Herman for the suggestion.         
 v1.1 - Changed layout for improved readabilty in poor light
 v1.0 - Initial release (available from: https://www.dropbox.com/s/aub5zlx1h5kueko/ActivityClassicv1.0.prg?dl=0 - can be side loaded by connecting watch to PC and copying the prg to \GARM\APPS) 
 

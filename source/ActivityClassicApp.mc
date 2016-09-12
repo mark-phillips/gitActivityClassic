@@ -24,5 +24,9 @@ class ActivityClassicApp extends App.AppBase {
         view = new ActivityClassicView();
         return [ view ];
     }
+    function initialize() {
+        AppBase.initialize();
+    }
+
 
 }

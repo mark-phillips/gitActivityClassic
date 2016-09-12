@@ -1,8 +1,9 @@
 <resources>
+  <string id="AppName">ActivityClassic</string>
 	<bitmap id="LauncherIcon" filename="images/launcher_icon.png" />
 	<fonts>
 		<font id="id_font_black_diamond" filename="fonts/blackdiamond.fnt"
 			filter="0123456789" />
 	</fonts>
-    <font id="id_font_moonphase" filename="fonts/moonphase.fnt" filter="@*ABCDEFGHIJKLMNOPQRSTUVWXYZ"/>
+    <font id="id_font_moonphase" filename="fonts/moonphase.fnt" filter="@0ABCDEFGHIJKLMNOPQRSTUVWXYZ"/>
 </resources>
