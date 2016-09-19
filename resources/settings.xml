@@ -11,6 +11,7 @@
         <property id="SHOW_ICONS" type="number">0</property>
         <property id="SMART_DATE" type="boolean">true</property>
         <property id="DATE_FORMAT" type="number">0</property>
+        <property id="MAIN_HAND_STYLE" type="number">101</property>    
         <property id="SECOND_HAND_STYLE" type="number">100</property>    
         <property id="SHOW_UTC_HAND" type="boolean">false</property> 
         <property id="UTC_HAND_OFFSET" type="number">0</property>         
@@ -42,6 +43,7 @@
         <string id="show_notification_arc">Show notification arc? </string>
         <string id="Notification_arc_colour">Notification arc colour? </string>
 
+       <string id="main_hand_style">Main hand style:</string>
        <string id="second_hand_style">Second hand style:</string>
        <string id="SHOW_UTC_HAND">Show Dual-Time Hour Hand?</string>
        <string id="UTC_Hand_Offset">Offset from local time in minutes (0=UTC offset).</string>
@@ -52,6 +54,7 @@
        <string id="CIRCLE_HAND">Circle hand</string>
        <string id="ARROW_HAND">Arrow hand</string>
        <string id="POINTER_HAND">Pointer hand</string>
+       <string id="ARROW_HAND3D">3D Arrow hand</string>
 
        <string id="WHITE">White</string>
        <string id="LT_GRAY">Light gray</string>
@@ -102,7 +105,16 @@
                 <listEntry value="255">@Rez.Strings.DK_BLUE</listEntry>
             </settingConfig>         
         </setting>                
-              
+           
+        <setting propertyKey="@Properties.MAIN_HAND_STYLE" title="@Strings.main_hand_style">
+            <settingConfig type="list">
+<!--                <listEntry value="100">@Rez.Strings.POINTER_HAND</listEntry>  -->
+                <listEntry value="101">@Rez.Strings.ARROW_HAND</listEntry>
+<!--                 <listEntry value="102">@Rez.Strings.CIRCLE_HAND</listEntry>   -->
+<!--                 <listEntry value="103">@Rez.Strings.SWORD_HAND</listEntry>   -->
+                <listEntry value="104">@Rez.Strings.ARROW_HAND3D</listEntry>
+            </settingConfig>
+        </setting>              
         <setting propertyKey="@Properties.SECOND_HAND_STYLE" title="@Strings.second_hand_style">
             <settingConfig type="list">
                 <listEntry value="100">@Rez.Strings.POINTER_HAND</listEntry>

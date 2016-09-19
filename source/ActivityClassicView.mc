@@ -45,7 +45,6 @@ class ActivityClassicView extends Ui.WatchFace {
     var feetcolour = Gfx.COLOR_LT_GRAY;
     var firstUpdateAfterSleep = false;
     var updateSettings = false;
-    var use3d = true;
     //
     // Global instance vars
     var radius = 0;
@@ -58,12 +57,14 @@ class ActivityClassicView extends Ui.WatchFace {
     var SMART_DATE = true;
     var DATE_FORMAT = 0;
     var PREVIOUS_MIN = -1;
+
     var POINTER = 100;
     var ARROW = 101;
     var CIRCLE= 102;
     var SWORD= 103;
-    var HOUR_HAND_STYLE = ARROW;
-    var MINUTE_HAND_STYLE = ARROW;
+    var ARROW3D= 104;
+
+    var MAIN_HAND_STYLE = ARROW;
     var SECOND_HAND_STYLE = POINTER;
     var SHOW_UTC_HAND = false;
     var UTC_HAND_OFFSET = 0;
@@ -85,19 +86,13 @@ class ActivityClassicView extends Ui.WatchFace {
       WatchFace.initialize();
       font = Ui.loadResource(Rez.Fonts.id_font_black_diamond);
       moonfont = Ui.loadResource(Rez.Fonts.id_font_moonphase);
-
       RetrieveSettings() ;
-//      if (use3d) {
-        background_icons = Ui.loadResource(Rez.Drawables.background_icons_3d_id); //
-//      }
-//      else {
-//        background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
-//      }
+      background_icons = Ui.loadResource(Rez.Drawables.background_icons_id);
       if (trace) { trace_exit("initialize"); }
     }
 
     //! Load resources
-    function onLayout()
+    function onLayout(dc)
     {
       if (trace) { trace_entry("onLayout","none"); }
 
@@ -149,8 +144,7 @@ class ActivityClassicView extends Ui.WatchFace {
         else if (icon_setting == 2) {
             SHOW_ICONS = false;
         }
-        //HOUR_HAND_STYLE = Application.getApp().getProperty("HOUR_HAND_STYLE");
-        //MINUTE_HAND_STYLE = Application.getApp().getProperty("MINUTE_HAND_STYLE");
+        MAIN_HAND_STYLE = getSetting("MAIN_HAND_STYLE",MAIN_HAND_STYLE);
         SECOND_HAND_STYLE = getSetting("SECOND_HAND_STYLE",SECOND_HAND_STYLE);
         SHOW_UTC_HAND = getSetting("SHOW_UTC_HAND",SHOW_UTC_HAND);
         UTC_HAND_OFFSET = getSetting("UTC_HAND_OFFSET",UTC_HAND_OFFSET);
@@ -260,7 +254,7 @@ class ActivityClassicView extends Ui.WatchFace {
         drawBlockImpl(dc,angle,coords);
     }
 
-    function drawArrowHand(dc,min,length,arrowLength, width, start, fillcolour)
+    function drawArrowHand(dc,min,length,arrowLength, width, start, fillcolour,use3d)
     {
         // Map out the coordinates of the watch hand
 
@@ -287,7 +281,7 @@ class ActivityClassicView extends Ui.WatchFace {
    //     }
     }
 
-    function drawPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2)
+    function drawPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2,use3d)
     {
         var length = (bodylength+arrowLength);
         var reverse_angle  = angle -  Math.PI; // opposite angle
@@ -305,7 +299,7 @@ class ActivityClassicView extends Ui.WatchFace {
           drawTriangle3d(dc, angle, width*1.4, length, bodylength,colour1,colour2);
         }
         else {
-          drawBlock(dc, reverse_angle, width, 0, length/4);
+          drawBlock(dc, reverse_angle, width, 0, length/3);
           drawBlock(dc, angle, width, 0, bodylength);
           drawTriangle(dc, angle, width, length, bodylength);
         }
@@ -317,20 +311,24 @@ class ActivityClassicView extends Ui.WatchFace {
         var reverse_angle  = angle -  Math.PI; // opposite angle
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
+        var radius = (width*2.5);
+        var inner_radius = radius*.75;
+
+
         // Draw the circle
         var cos = Math.cos(angle);
         var sin = Math.sin(angle);
-        var x = (0 * cos) + ((length*.60) * sin);
-        var y = (0 * sin) - ((length*.60) * cos);
+        var circle_x = (0 * cos) + ((bodylength-inner_radius) * sin) + xcenter;
+        var circle_y =(0 * sin) - ((bodylength-inner_radius) * cos) + ycenter;
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        dc.fillCircle(xcenter+x, ycenter+y, (width*2.5)+1);
+        dc.fillCircle(circle_x, circle_y, radius+1);
 
-        drawPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2);
+        drawPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2,true);
 
         dc.setColor(colour1,Gfx.COLOR_WHITE);
-        dc.fillCircle(xcenter+x, ycenter+y, (width*2.5));
+        dc.fillCircle(circle_x, circle_y, radius);
         dc.setColor(highlight_colour,highlight_colour);
-        dc.fillCircle(xcenter+x, ycenter+y, width*1.8);
+        dc.fillCircle(circle_x, circle_y, inner_radius);
     }
     function drawArrowPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2,highlight_colour)
     {
@@ -342,19 +340,19 @@ class ActivityClassicView extends Ui.WatchFace {
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
 
-        drawPointerHand(dc,angle,bodylength,pointLength,width,colour1,colour2);
+        drawPointerHand(dc,angle,bodylength,pointLength,width,colour1,colour2,true);
         // Draw arrow
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         drawTriangle(dc, angle, width+arrowLength+4, length+arrowLength+2,length-1);
         dc.setColor(colour1,colour1);
-        drawTriangle(dc, angle, width+arrowLength, length+arrowLength,length-1,colour1,colour2);
+        drawTriangle(dc, angle, width+arrowLength, length+arrowLength,length-1);
         dc.setColor(highlight_colour,highlight_colour);
         drawTriangle(dc, angle, arrowLength-outline*2, length+arrowLength-outline-1,length+outline-1);
 
     }
-    function drawArrowHandExtended(dc,min,length,arrowLength, width, start, fillcolour)
+    function drawArrowHandExtended(dc,min,length,arrowLength, width, start, fillcolour,use3d)
     {
-        drawArrowHand(dc,min,length,arrowLength, width, start, fillcolour);
+        drawArrowHand(dc,min,length,arrowLength, width, start, fillcolour,use3d);
         // Black outline
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         drawBlock(dc, min, width+2, 0, -(length+2)/3);
@@ -375,7 +373,12 @@ class ActivityClassicView extends Ui.WatchFace {
         var width = 12;
         var arrowLength = 20;
         var start = 16;
-        drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE);
+        if (MAIN_HAND_STYLE == ARROW3D) {
+            drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,true);
+        }
+        else if (MAIN_HAND_STYLE == ARROW)  {
+            drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,false);
+        }
         // If we're not drawing a second hand then draw the inner circle now because the
         // minute hand is the top hand
         if (topHand == true) {
@@ -390,10 +393,15 @@ class ActivityClassicView extends Ui.WatchFace {
         var width = 14;
         var start = 16;
         var arrowLength = 20;
-        if (HOUR_HAND_STYLE == ARROW) {
-            drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE);
+        if (MAIN_HAND_STYLE == ARROW3D) {
+            drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,true);
         }
-        else if (HOUR_HAND_STYLE == POINTER) {
+        else if (MAIN_HAND_STYLE == ARROW)  {
+            drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,false);
+        }
+        else if (MAIN_HAND_STYLE == POINTER) {
+        }
+        else if (MAIN_HAND_STYLE == SWORD) {
         }
         else {
         }
@@ -405,13 +413,15 @@ class ActivityClassicView extends Ui.WatchFace {
         var start = 20;
         var arrowLength = 20;
         if (SECOND_HAND_STYLE == ARROW) {
-            drawArrowHandExtended(dc,sec,length,arrowLength,8,start,Gfx.COLOR_WHITE);
+            drawArrowHandExtended(dc,sec,length,arrowLength,8,start,Gfx.COLOR_WHITE,false);
            // draw the inner circle now because the second hand is the top hand
             drawInnerCircle(dc);
-
+        }
+        else if (SECOND_HAND_STYLE == ARROW3D) {
+            drawArrowHandExtended(dc,sec,length,arrowLength,8,start,Gfx.COLOR_WHITE,true);
         }
         else if (SECOND_HAND_STYLE == POINTER) {
-            drawPointerHand(dc,sec,length,arrowLength,4,Gfx.COLOR_RED,Gfx.COLOR_DK_RED);
+            drawPointerHand(dc,sec,length,arrowLength,4,Gfx.COLOR_RED,Gfx.COLOR_DK_RED,true);
         }
         else {
         }
@@ -421,7 +431,7 @@ class ActivityClassicView extends Ui.WatchFace {
         if (UTC_HAND_STYLE == ARROW) {
             drawArrowPointerHand(dc,hour,adjustSemiRound(25),adjustSemiRound(21),5,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,UTC_HIGHLIGHT_COLOUR);
         } else {
-            drawCircleHand(dc,hour,adjustSemiRound(60),25,4,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,UTC_HIGHLIGHT_COLOUR);
+            drawCircleHand(dc,hour,adjustSemiRound(50),adjustSemiRound(25),4,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,UTC_HIGHLIGHT_COLOUR);
         }
     }
 
