@@ -20,6 +20,7 @@ class ActivityClassicView extends Ui.WatchFace {
     var font;
     var moonfont;
     var background_icons;
+
     //
     // Constants
     var highPowerMode = false;
@@ -45,6 +46,12 @@ class ActivityClassicView extends Ui.WatchFace {
     var feetcolour = Gfx.COLOR_LT_GRAY;
     var firstUpdateAfterSleep = false;
     var updateSettings = false;
+
+    var PREVIOUS_MINUTE_OF_DAY = -1;
+    var PREVIOUS_SUN_CALC_DAY = -1;
+    var NEXT_SUNRISE_OR_SUNSET = -1;
+    var todaySunTimes = null;
+    var tomorrowSunTimes = null;
     //
     // Global instance vars
     var radius = 0;
@@ -56,8 +63,6 @@ class ActivityClassicView extends Ui.WatchFace {
     var SHOW_ICONS = true;
     var SMART_DATE = true;
     var DATE_FORMAT = 0;
-    var PREVIOUS_MIN = -1;
-
     var POINTER = 100;
     var ARROW = 101;
     var CIRCLE= 102;
@@ -160,14 +165,14 @@ class ActivityClassicView extends Ui.WatchFace {
     {
     }
 
-    function drawTriangleImpl(dc, angle,  coords)
+    function drawTriangleImpl(dc, angle_in_radians,  coords)
     {
         // Map out the coordinates
         var result = new [3];
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
-        var cos = Math.cos(angle);
-        var sin = Math.sin(angle);
+        var cos = Math.cos(angle_in_radians);
+        var sin = Math.sin(angle_in_radians);
 
         // Transform the coordinates
         for (var i = 0; i < 3; i += 1)
@@ -181,41 +186,41 @@ class ActivityClassicView extends Ui.WatchFace {
         dc.fillPolygon(result);
     }
 
-    function drawTriangle(dc, angle, width, inner, length)
+    function drawTriangle(dc, angle_in_radians, width, inner, length)
     {
         // Map out the coordinates
         var coords = [ [0,-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length] ];
-        drawTriangleImpl(dc, angle, coords);
+        drawTriangleImpl(dc, angle_in_radians, coords);
     }
 
-    function drawTriangle3d(dc, angle, width, inner, length, light_colour, dark_colour)
+    function drawTriangle3d(dc, angle_in_radians, width, inner, length, light_colour, dark_colour)
     {
 //      if (trace) { trace_entry("drawTriangle3d","none"); }
 
         var colour1 = dark_colour;
         var colour2 = light_colour;
 //        if (trace) { trace_data("angle" + angle); }
-        if (angle > 3.14159) {  // after 180 degrees (in rads), switch shadow
+        if (angle_in_radians > 3.14159) {  // after 180 degrees (in rads), switch shadow
             colour1 = light_colour;
             colour2 = dark_colour;
         }
         var coords = [ [0,-inner], [-(adjustSemiRound(width)/2), -length], [0, -length] ];
         dc.setColor(colour1,colour1);
-        drawTriangleImpl(dc, angle, coords);
+        drawTriangleImpl(dc, angle_in_radians, coords);
         coords = [ [0,-inner], [0, -length], [adjustSemiRound(width)/2, -length] ];
         dc.setColor(colour2,colour2);
-        drawTriangleImpl(dc, angle, coords);
+        drawTriangleImpl(dc, angle_in_radians, coords);
 
         //if (trace) { trace_exit("drawTriangle3d"); }
     }
 
-    function drawBlockImpl(dc, angle, coords)
+    function drawBlockImpl(dc, angle_in_radians, coords)
     {
         var result = new [4];
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
-        var cos = Math.cos(angle);
-        var sin = Math.sin(angle);
+        var cos = Math.cos(angle_in_radians);
+        var sin = Math.sin(angle_in_radians);
 
         // Transform the coordinates
         for (var i = 0; i < 4; i += 1)
@@ -228,30 +233,30 @@ class ActivityClassicView extends Ui.WatchFace {
         // Draw the polygon
         dc.fillPolygon(result);
     }
-    function drawBlock(dc, angle, width, inner, length)
+    function drawBlock(dc, angle_in_radians, width, inner, length)
     {
         // Map out the coordinates
         var coords = [ [-(adjustSemiRound(width)/2),-inner], [-(adjustSemiRound(width)/2), -length], [adjustSemiRound(width)/2, -length], [adjustSemiRound(width)/2, -inner] ];
-        drawBlockImpl(dc,angle,coords);
+        drawBlockImpl(dc,angle_in_radians,coords);
     }
 
     // ============================================================
     // Draw 3d Block
     // ============================================================
-    function drawBlock3d(dc, angle, width, inner, length, light_colour, dark_colour)
+    function drawBlock3d(dc, angle_in_radians, width, inner, length, light_colour, dark_colour)
     {
         var colour1 = dark_colour;
         var colour2 = light_colour;
-        if (angle > 3.14159) {  // after minute 30, switch shadow
+        if (angle_in_radians > 3.14159) {  // after minute 30, switch shadow
             colour1 = light_colour;
             colour2 = dark_colour;
         }
         var coords = [ [-(adjustSemiRound(width)/2),-inner], [-(adjustSemiRound(width)/2), -length], [0, -length], [0, -inner] ];
         dc.setColor(colour1,colour1);
-        drawBlockImpl(dc,angle,coords);
+        drawBlockImpl(dc,angle_in_radians,coords);
         coords = [ [0,-inner], [0, -length], [adjustSemiRound(width)/2, -length], [adjustSemiRound(width)/2, -inner] ];
         dc.setColor(colour2,colour2);
-        drawBlockImpl(dc,angle,coords);
+        drawBlockImpl(dc,angle_in_radians,coords);
     }
 
     function drawArrowHand(dc,min,length,arrowLength, width, start, fillcolour,use3d)
@@ -281,34 +286,34 @@ class ActivityClassicView extends Ui.WatchFace {
    //     }
     }
 
-    function drawPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2,use3d)
+    function drawPointerHand(dc,angle_in_radians,bodylength,arrowLength,width,colour1,colour2,use3d)
     {
         var length = (bodylength+arrowLength);
-        var reverse_angle  = angle -  Math.PI; // opposite angle
+        var reverse_angle_in_radians  = angle_in_radians -  Math.PI; // opposite angle
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
 
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        drawTriangle(dc, angle, width+4, length+2, bodylength);
+        drawTriangle(dc, angle_in_radians, width+4, length+2, bodylength);
 
         dc.setColor(colour1,Gfx.COLOR_WHITE);
         dc.fillCircle(xcenter, ycenter, 5);
         if (use3d) {
-          drawBlock3d(dc, reverse_angle, width*1.4, 0, length/3,colour2,colour1);
-          drawBlock3d(dc, angle, width*1.4, 0, bodylength,colour1,colour2);
-          drawTriangle3d(dc, angle, width*1.4, length, bodylength,colour1,colour2);
+          drawBlock3d(dc, reverse_angle_in_radians, width*1.4, 0, length/3,colour2,colour1);
+          drawBlock3d(dc, angle_in_radians, width*1.4, 0, bodylength,colour1,colour2);
+          drawTriangle3d(dc, angle_in_radians, width*1.4, length, bodylength,colour1,colour2);
         }
         else {
-          drawBlock(dc, reverse_angle, width, 0, length/3);
-          drawBlock(dc, angle, width, 0, bodylength);
-          drawTriangle(dc, angle, width, length, bodylength);
+          drawBlock(dc, reverse_angle_in_radians, width, 0, length/3);
+          drawBlock(dc, angle_in_radians, width, 0, bodylength);
+          drawTriangle(dc, angle_in_radians, width, length, bodylength);
         }
     }
 
-    function drawCircleHand(dc,angle,bodylength,arrowLength,width,colour1,colour2,highlight_colour)
+    function drawCircleHand(dc,angle_in_radians,bodylength,arrowLength,width,colour1,colour2,highlight_colour)
     {
         var length = (bodylength+arrowLength);
-        var reverse_angle  = angle -  Math.PI; // opposite angle
+        var reverse_angle_in_radians  = angle_in_radians -  Math.PI; // opposite angle
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
         var radius = (width*2.5);
@@ -316,38 +321,38 @@ class ActivityClassicView extends Ui.WatchFace {
 
 
         // Draw the circle
-        var cos = Math.cos(angle);
-        var sin = Math.sin(angle);
+        var cos = Math.cos(angle_in_radians);
+        var sin = Math.sin(angle_in_radians);
         var circle_x = (0 * cos) + ((bodylength-inner_radius) * sin) + xcenter;
         var circle_y =(0 * sin) - ((bodylength-inner_radius) * cos) + ycenter;
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         dc.fillCircle(circle_x, circle_y, radius+1);
 
-        drawPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2,true);
+        drawPointerHand(dc,angle_in_radians,bodylength,arrowLength,width,colour1,colour2,true);
 
         dc.setColor(colour1,Gfx.COLOR_WHITE);
         dc.fillCircle(circle_x, circle_y, radius);
         dc.setColor(highlight_colour,highlight_colour);
         dc.fillCircle(circle_x, circle_y, inner_radius);
     }
-    function drawArrowPointerHand(dc,angle,bodylength,arrowLength,width,colour1,colour2,highlight_colour)
+    function drawArrowPointerHand(dc,angle_in_radians,bodylength,arrowLength,width,colour1,colour2,highlight_colour)
     {
         arrowLength = arrowLength;
         var outline = width/1.75;
         var pointLength = bodylength*.8;
         var length = (bodylength+pointLength)-3;
-        var reverse_angle  = angle -  Math.PI; // opposite angle
+        var reverse_angle_in_radians  = angle_in_radians -  Math.PI; // opposite angle
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
 
-        drawPointerHand(dc,angle,bodylength,pointLength,width,colour1,colour2,true);
+        drawPointerHand(dc,angle_in_radians,bodylength,pointLength,width,colour1,colour2,true);
         // Draw arrow
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
-        drawTriangle(dc, angle, width+arrowLength+4, length+arrowLength+2,length-1);
+        drawTriangle(dc, angle_in_radians, width+arrowLength+4, length+arrowLength+2,length-1);
         dc.setColor(colour1,colour1);
-        drawTriangle(dc, angle, width+arrowLength, length+arrowLength,length-1);
+        drawTriangle(dc, angle_in_radians, width+arrowLength, length+arrowLength,length-1);
         dc.setColor(highlight_colour,highlight_colour);
-        drawTriangle(dc, angle, arrowLength-outline*2, length+arrowLength-outline-1,length+outline-1);
+        drawTriangle(dc, angle_in_radians, arrowLength-outline*2, length+arrowLength-outline-1,length+outline-1);
 
     }
     function drawArrowHandExtended(dc,min,length,arrowLength, width, start, fillcolour,use3d)
@@ -412,6 +417,7 @@ class ActivityClassicView extends Ui.WatchFace {
         var length = adjustSemiRound(74);
         var start = 20;
         var arrowLength = 20;
+        sec = (sec/ 60.0) * Math.PI * 2;
         if (SECOND_HAND_STYLE == ARROW) {
             drawArrowHandExtended(dc,sec,length,arrowLength,8,start,Gfx.COLOR_WHITE,false);
            // draw the inner circle now because the second hand is the top hand
@@ -434,7 +440,70 @@ class ActivityClassicView extends Ui.WatchFace {
             drawCircleHand(dc,hour,adjustSemiRound(50),adjustSemiRound(25),4,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,UTC_HIGHLIGHT_COLOUR);
         }
     }
+    function minutes_to_rads(minutes) {
+        return ( minutes / 60.0) * Math.PI * 2;
+    }
 
+    function minuteOfDayToTimeString(minute_of_day) {
+        return Lang.format("$1$:$2$", [(minute_of_day/60).toNumber().format("%.2d"),(minute_of_day.toNumber()%60).format("%.2d")]);
+    }
+
+    function drawSunHand(dc,minute_of_day)
+    {
+        var fillColour = Gfx.COLOR_DK_RED;
+        if (todaySunTimes != null && minute_of_day <= todaySunTimes.mSunrise) {
+            NEXT_SUNRISE_OR_SUNSET = todaySunTimes.mSunrise;
+        }
+        else if (todaySunTimes != null && minute_of_day <= todaySunTimes.mSunset) {
+            NEXT_SUNRISE_OR_SUNSET = todaySunTimes.mSunset;
+            fillColour = Gfx.COLOR_BLACK;
+        }
+        else if (todaySunTimes != null && minute_of_day > todaySunTimes.mSunset) {
+            NEXT_SUNRISE_OR_SUNSET = tomorrowSunTimes.mSunrise;
+            if (trace) { trace_data("Next sun event is tomorrow's sunrise" );}
+        }
+        if (trace) { trace_data("Next Sunrise/Sunset: " + minuteOfDayToTimeString(NEXT_SUNRISE_OR_SUNSET));}
+        if (NEXT_SUNRISE_OR_SUNSET != -1) {
+            drawCircleHand(dc,minutes_to_rads(NEXT_SUNRISE_OR_SUNSET/12),
+                   adjustSemiRound(42),adjustSemiRound(23),2,
+                   Gfx.COLOR_YELLOW,Gfx.COLOR_ORANGE,fillColour);
+        }
+    }
+
+    function calculateSunEvents(clockTime,calendar_info)    {
+        var position = Activity.getActivityInfo().currentLocation;
+        var se = new SunriseEquation();
+        if (position == null) { // or PREVIOUS_SUN_CALC_DAY == calendar_info.day) {
+            if (trace) { trace_data("Sunrise/Sunset not shown - no position data!");}
+            return;
+        }
+        if (PREVIOUS_SUN_CALC_DAY == calendar_info.day) {
+            return;  // already calculated today
+        }
+        else  // New day - new calc
+        {
+          PREVIOUS_SUN_CALC_DAY = calendar_info.day;
+          var hour = 0;
+          var min = 0;
+          var lonW = position.toDegrees()[1].abs().toDouble();
+          var latN = position.toDegrees()[0].toDouble();
+          var utcOffset = new Time.Duration(-clockTime.timeZoneOffset);
+          System.println("utcOffset: " + utcOffset.value());
+          var JulianDayNow = se.evaluateJulianDay(utcOffset);
+
+          todaySunTimes = se.evaluateSunriseAndSetAsTime(lonW, latN,
+                                                         JulianDayNow,utcOffset);
+          tomorrowSunTimes = se.evaluateSunriseAndSetAsTime(lonW, latN,
+                                                            JulianDayNow+1,utcOffset);
+          if (trace) {
+            trace_data("utcOffset: " + utcOffset.value());
+            trace_data("today Sunrise: " + todaySunTimes.mSunrise + "(" + minuteOfDayToTimeString(todaySunTimes.mSunrise));
+            trace_data("today Sunset: " + todaySunTimes.mSunset + "(" +minuteOfDayToTimeString(todaySunTimes.mSunset));
+            trace_data("tomorrow Sunrise: " +tomorrowSunTimes.mSunrise + "(" +minuteOfDayToTimeString(tomorrowSunTimes.mSunrise));
+            trace_data("tomorrow Sunset: " + tomorrowSunTimes.mSunset+ "(" +minuteOfDayToTimeString(tomorrowSunTimes.mSunset) );
+          }
+        }
+    }
 
     function drawTwelve(dc)
     {
@@ -479,14 +548,14 @@ class ActivityClassicView extends Ui.WatchFace {
     // ============================================================
     function drawSegment(dc, startmin, endmin, colour)
     {
-        var startangle = (180- startmin * 6 ) * DEG2RAD;
-        var endangle = (180- endmin * 6 )  * DEG2RAD;
+        var startangle_in_radians = (180- startmin * 6 ) * DEG2RAD;
+        var endangle_in_radians = (180- endmin * 6 )  * DEG2RAD;
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
-        var startx = xcenter + (50+ radius) * Math.sin(startangle);
-        var starty = ycenter + (50+ radius) * Math.cos(startangle);
-        var   endx = xcenter + (50+ radius) * Math.sin(  endangle);
-        var   endy = ycenter + (50+ radius) * Math.cos(  endangle);
+        var startx = xcenter + (50+ radius) * Math.sin(startangle_in_radians);
+        var starty = ycenter + (50+ radius) * Math.cos(startangle_in_radians);
+        var   endx = xcenter + (50+ radius) * Math.sin(  endangle_in_radians);
+        var   endy = ycenter + (50+ radius) * Math.cos(  endangle_in_radians);
         // Map out the coordinates
         var coords = [ [radius,radius], [startx, starty], [endx,endy] ];
 
@@ -512,12 +581,11 @@ class ActivityClassicView extends Ui.WatchFace {
     }
 
 
-    function getDateString(clockTime, now) {
+    function getDateString(clockTime, now, calendar_info) {
         //
         // Compute the date string & location
         var dateStr = "";
         var date_type = DATE_FORMAT;
-        var calendar_info = Calendar.info(now, Time.FORMAT_MEDIUM);
 
         //
         // Handle alternating date formats
@@ -604,9 +672,9 @@ class ActivityClassicView extends Ui.WatchFace {
     }
 
     // ============================================================
-    function drawDateAndNumerals(dc,clockTime,now,hour) {
+    function drawDateAndNumerals(dc,clockTime,now,hour,calendar_info) {
         // Get date string
-        var dateStr = getDateString(clockTime,now);
+        var dateStr = getDateString(clockTime,now,calendar_info);
         // ============================================================
         // Adjust the date position?
         var switch_date = false;
@@ -703,12 +771,20 @@ class ActivityClassicView extends Ui.WatchFace {
         var ycenter = screen_height/2;
         var clockTime = Sys.getClockTime();
         var now = Time.now();
-        var hour =( ( ( clockTime.hour % 12 ) * 60 ) + clockTime.min );  // 12 hour time in minutes
+        var minute_of_day_12_hour_clock =( ( ( clockTime.hour % 12 ) * 60 ) + clockTime.min );  // 12 hour time in minutes
+        var minute_of_day =( ( ( clockTime.hour ) * 60 ) + clockTime.min );  // 24 hour time in minutes
         var activityInfo;
 
         if (updateSettings) {
           RetrieveSettings();
           updateSettings = false;
+        }
+        else
+        if ( PREVIOUS_MINUTE_OF_DAY == minute_of_day &&
+             highPowerMode == false &&
+             firstUpdateAfterSleep == false)
+        {
+          return;  // Don't update > once a minute
         }
 
         activityInfo = Act.getInfo();
@@ -752,8 +828,6 @@ class ActivityClassicView extends Ui.WatchFace {
             if (progress > 1)
             {
                 progress = 1;
-//drawSegment(dc, 30, 30-15*progress, Gfx.COLOR_GREEN);
-
             }
 //            else {
             drawSegment(dc, 30, 30-15*progress, Gfx.COLOR_BLUE );
@@ -764,7 +838,7 @@ class ActivityClassicView extends Ui.WatchFace {
             {
               feetcolour = Gfx.COLOR_BLACK;
             }
-            // else determin icon colour as long as we are not updating every second
+            // else determine icon colour as long as we are not updating every second
             // (results are unpredictable for steps in high power mode so just use previous color)
             // (Also use last colour if we just dropped into low power mode)
             else {
@@ -810,7 +884,6 @@ class ActivityClassicView extends Ui.WatchFace {
         // ============================================================
         // Draw the Sleep icon
 
-        //var sleep_move_icon_x = screen_width - *.23;
         var sleep_move_icon_x = screen_width - screen_width*.77;
         var sleep_move_icon_y = screen_height*.70;
         if (activityInfo != null && activityInfo.isSleepMode  )
@@ -838,7 +911,11 @@ class ActivityClassicView extends Ui.WatchFace {
         // ============================================================
         // Draw the numbers and mooon phase
         drawTwelve(dc);
-        drawDateAndNumerals(dc,clockTime,now,hour);
+        var calendar_info = Calendar.info(now, Time.FORMAT_MEDIUM);
+        drawDateAndNumerals(dc,clockTime,now,minute_of_day_12_hour_clock, calendar_info );
+
+        calculateSunEvents(clockTime,calendar_info);
+        drawSunHand(dc,minute_of_day);
 
         // ============================================================
         // Draw the UTC hour hand.
@@ -848,28 +925,26 @@ class ActivityClassicView extends Ui.WatchFace {
                 UTC_hour = hour - (clockTime.timeZoneOffset / 60) ;
             }
             else {
-                    if (trace) { trace_data("hour " + hour  + " Offset " +  UTC_HAND_OFFSET) ; }
-
-                UTC_hour = hour + UTC_HAND_OFFSET ;
+                if (trace) { trace_data("minute_of_day " + minute_of_day  + " UTC Offset " +  UTC_HAND_OFFSET) ; }
+                UTC_hour = minute_of_day_12_hour_clock + UTC_HAND_OFFSET ;
             }
-            UTC_hour = UTC_hour / (12 * 60.0);
-            drawUTCHand(dc, UTC_hour * Math.PI * 2);
+            //UTC_hour = UTC_hour / (12 * 60.0);
+            drawUTCHand(dc, minutes_to_rads(UTC_hour /12));
         }
 
-        // Draw the hour hand. Convert it to minutes and compute the angle.
-        hour = hour / (12 * 60.0);
-        drawHourHand(dc, hour * Math.PI * 2);
+        // Draw the hour hand. Convert time to clock minutes and compute the angle.
+        drawHourHand(dc, minutes_to_rads(minute_of_day_12_hour_clock / 12));
 
         // ============================================================
         // Draw the minute hand
-        drawMinuteHand(dc, ( clockTime.min / 60.0) * Math.PI * 2, !highPowerMode);
+        drawMinuteHand(dc, minutes_to_rads( clockTime.min ), !highPowerMode);
 
         // ============================================================
         // Draw the second hand
         if (highPowerMode == true)
         {
           //var sec  =  ;
-          drawSecondHand(dc, (clockTime.sec/ 60.0) * Math.PI * 2);
+          drawSecondHand(dc, clockTime.sec);
         }
 
       // ============================================================
@@ -877,7 +952,7 @@ class ActivityClassicView extends Ui.WatchFace {
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         dc.fillCircle(xcenter, ycenter, 2 );
 
-      PREVIOUS_MIN = clockTime.min;
+      PREVIOUS_MINUTE_OF_DAY = minute_of_day;
       if (trace) { trace_exit("onUpdate"); }
     }
 
