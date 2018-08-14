@@ -2,8 +2,14 @@
     <iq:application entry="ActivityClassicApp" id="5F17D8B5833844DDB91123DB246BBC88" launcherIcon="@Drawables.LauncherIcon" minSdkVersion="1.2.1" name="@Strings.AppName" type="watchface">
 
         <iq:products>
+            <iq:product id="approachs60"/>        
             <iq:product id="d2bravo"/>
             <iq:product id="d2bravo_titanium"/>    
+            <iq:product id="d2charlie"/>
+            <iq:product id="d2delta"/>
+            <iq:product id="d2deltapx"/>
+            <iq:product id="d2deltas"/>
+            <iq:product id="descentmk1"/>            
             <iq:product id="fenix3"/>
             <iq:product id="fenix3_hr"/>            
             <iq:product id="fenix5"/>
@@ -16,7 +22,12 @@
             <iq:product id="fr235"/>
             <iq:product id="fr230"/>      
             <iq:product id="fr630"/>
+            <iq:product id="fr645"/>
+            <iq:product id="fr645m"/>            
             <iq:product id="fr735xt"/>
+            <iq:product id="fr935"/>
+            <iq:product id="vivoactive3"/>
+            <iq:product id="vivoactive3m"/>
         </iq:products>
 
         <iq:languages/>

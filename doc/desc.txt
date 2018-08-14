@@ -30,10 +30,12 @@ Features include:
 
 
 Version history:
-V1.9 - Add support for 
+
+V2   - Add support for Approach®S60, fēnix® 5, fēnix® 5X, Forerunner® 935, d2charlie, d2delta, d2deltapx, d2deltas, descentmk1, fr645, fr645m, vivoactive3, vivoactive3m,            
 V1.81 - Fix defect in drawing hands when second hand turned off
-v2.1 - Add support for Fenix Chronos and Fenix 5s
-v2.0 - Added optional UTC hand with large circle and configurable highlight colour
+v1.8 - Add support for Fenix Chronos and Fenix 5s
+V1.71 - Add option to turn off second hand 
+v1.7 - Added optional UTC hand with large circle and configurable highlight colour
      - New optional moon phase indicator in place of numeral 6 or 9.
      - New configurable second-hand style (arrow or pointer) 
      - New "3d" look to hands and dial      
@@ -43,8 +45,6 @@ v1.5 - Add support for fr735xt and d2bravo_titanium.
      - Add notification arc.  Thanks to Milos Herman for the suggestion.         
 v1.1 - Changed layout for improved readabilty in poor light
 v1.0 - Initial release (available from: https://www.dropbox.com/s/aub5zlx1h5kueko/ActivityClassicv1.0.prg?dl=0 - can be side loaded by connecting watch to PC and copying the prg to \GARM\APPS) 
-
-
 
 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 

@@ -858,7 +858,7 @@ class ActivityClassicView extends Ui.WatchFace {
         if (SHOW_UTC_HAND ) {
             var UTC_hour = 0;
             if ( UTC_HAND_OFFSET == 0 ) {
-                UTC_hour = hour - (clockTime.timeZoneOffset / 60) ;
+                UTC_hour = clockTime.hour - (clockTime.timeZoneOffset / 60) ;
             }
             else {
                 if (trace) { trace_data("minute_of_day " + minute_of_day  + " UTC Offset " +  UTC_HAND_OFFSET) ; }
