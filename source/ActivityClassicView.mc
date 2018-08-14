@@ -20,7 +20,6 @@ class ActivityClassicView extends Ui.WatchFace {
     var font;
     var moonfont;
     var background_icons;
-
     //
     // Constants
     var highPowerMode = false;
@@ -52,6 +51,7 @@ class ActivityClassicView extends Ui.WatchFace {
     var NEXT_SUNRISE_OR_SUNSET = -1;
     var todaySunTimes = null;
     var tomorrowSunTimes = null;
+    var saved_position = null;
     //
     // Global instance vars
     var radius = 0;
@@ -64,6 +64,7 @@ class ActivityClassicView extends Ui.WatchFace {
     var SMART_DATE = true;
     var DATE_FORMAT = 0;
     var POINTER = 100;
+    var OFF = 999;
     var ARROW = 101;
     var CIRCLE= 102;
     var SWORD= 103;
@@ -372,7 +373,7 @@ class ActivityClassicView extends Ui.WatchFace {
     }
 
 
-    function drawMinuteHand(dc, min, topHand)
+    function drawMinuteHand(dc, min)
     {
         var length = adjustSemiRound(70);
         var width = 12;
@@ -383,11 +384,6 @@ class ActivityClassicView extends Ui.WatchFace {
         }
         else if (MAIN_HAND_STYLE == ARROW)  {
             drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,false);
-        }
-        // If we're not drawing a second hand then draw the inner circle now because the
-        // minute hand is the top hand
-        if (topHand == true) {
-          drawInnerCircle(dc);
         }
     }
 
@@ -446,63 +442,6 @@ class ActivityClassicView extends Ui.WatchFace {
 
     function minuteOfDayToTimeString(minute_of_day) {
         return Lang.format("$1$:$2$", [(minute_of_day/60).toNumber().format("%.2d"),(minute_of_day.toNumber()%60).format("%.2d")]);
-    }
-
-    function drawSunHand(dc,minute_of_day)
-    {
-        var fillColour = Gfx.COLOR_DK_RED;
-        if (todaySunTimes != null && minute_of_day <= todaySunTimes.mSunrise) {
-            NEXT_SUNRISE_OR_SUNSET = todaySunTimes.mSunrise;
-        }
-        else if (todaySunTimes != null && minute_of_day <= todaySunTimes.mSunset) {
-            NEXT_SUNRISE_OR_SUNSET = todaySunTimes.mSunset;
-            fillColour = Gfx.COLOR_BLACK;
-        }
-        else if (todaySunTimes != null && minute_of_day > todaySunTimes.mSunset) {
-            NEXT_SUNRISE_OR_SUNSET = tomorrowSunTimes.mSunrise;
-            if (trace) { trace_data("Next sun event is tomorrow's sunrise" );}
-        }
-        if (trace) { trace_data("Next Sunrise/Sunset: " + minuteOfDayToTimeString(NEXT_SUNRISE_OR_SUNSET));}
-        if (NEXT_SUNRISE_OR_SUNSET != -1) {
-            drawCircleHand(dc,minutes_to_rads(NEXT_SUNRISE_OR_SUNSET/12),
-                   adjustSemiRound(42),adjustSemiRound(23),2,
-                   Gfx.COLOR_YELLOW,Gfx.COLOR_ORANGE,fillColour);
-        }
-    }
-
-    function calculateSunEvents(clockTime,calendar_info)    {
-        var position = Activity.getActivityInfo().currentLocation;
-        var se = new SunriseEquation();
-        if (position == null) { // or PREVIOUS_SUN_CALC_DAY == calendar_info.day) {
-            if (trace) { trace_data("Sunrise/Sunset not shown - no position data!");}
-            return;
-        }
-        if (PREVIOUS_SUN_CALC_DAY == calendar_info.day) {
-            return;  // already calculated today
-        }
-        else  // New day - new calc
-        {
-          PREVIOUS_SUN_CALC_DAY = calendar_info.day;
-          var hour = 0;
-          var min = 0;
-          var lonW = position.toDegrees()[1].abs().toDouble();
-          var latN = position.toDegrees()[0].toDouble();
-          var utcOffset = new Time.Duration(-clockTime.timeZoneOffset);
-          System.println("utcOffset: " + utcOffset.value());
-          var JulianDayNow = se.evaluateJulianDay(utcOffset);
-
-          todaySunTimes = se.evaluateSunriseAndSetAsTime(lonW, latN,
-                                                         JulianDayNow,utcOffset);
-          tomorrowSunTimes = se.evaluateSunriseAndSetAsTime(lonW, latN,
-                                                            JulianDayNow+1,utcOffset);
-          if (trace) {
-            trace_data("utcOffset: " + utcOffset.value());
-            trace_data("today Sunrise: " + todaySunTimes.mSunrise + "(" + minuteOfDayToTimeString(todaySunTimes.mSunrise));
-            trace_data("today Sunset: " + todaySunTimes.mSunset + "(" +minuteOfDayToTimeString(todaySunTimes.mSunset));
-            trace_data("tomorrow Sunrise: " +tomorrowSunTimes.mSunrise + "(" +minuteOfDayToTimeString(tomorrowSunTimes.mSunrise));
-            trace_data("tomorrow Sunset: " + tomorrowSunTimes.mSunset+ "(" +minuteOfDayToTimeString(tomorrowSunTimes.mSunset) );
-          }
-        }
     }
 
     function drawTwelve(dc)
@@ -914,9 +853,6 @@ class ActivityClassicView extends Ui.WatchFace {
         var calendar_info = Calendar.info(now, Time.FORMAT_MEDIUM);
         drawDateAndNumerals(dc,clockTime,now,minute_of_day_12_hour_clock, calendar_info );
 
-        calculateSunEvents(clockTime,calendar_info);
-        drawSunHand(dc,minute_of_day);
-
         // ============================================================
         // Draw the UTC hour hand.
         if (SHOW_UTC_HAND ) {
@@ -937,18 +873,24 @@ class ActivityClassicView extends Ui.WatchFace {
 
         // ============================================================
         // Draw the minute hand
-        drawMinuteHand(dc, minutes_to_rads( clockTime.min ), !highPowerMode);
+        drawMinuteHand(dc, minutes_to_rads( clockTime.min ) );
 
         // ============================================================
         // Draw the second hand
-        if (highPowerMode == true)
+        if (highPowerMode == true and
+            SECOND_HAND_STYLE != OFF)
         {
           //var sec  =  ;
           drawSecondHand(dc, clockTime.sec);
         }
+        else
+        {
+        // If we're not drawing a second hand then draw the inner circle
+          drawInnerCircle(dc);
+        }
 
       // ============================================================
-      // Draw the inner circle
+      // Draw the center dot
         dc.setColor(Gfx.COLOR_BLACK,Gfx.COLOR_BLACK);
         dc.fillCircle(xcenter, ycenter, 2 );
 

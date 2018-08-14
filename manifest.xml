@@ -2,17 +2,22 @@
     <iq:application entry="ActivityClassicApp" id="5F17D8B5833844DDB91123DB246BBC88" launcherIcon="@Drawables.LauncherIcon" minSdkVersion="1.2.1" name="@Strings.AppName" type="watchface">
 
         <iq:products>
-            <iq:product id="fenix3"/>
-            <iq:product id="fenix3_hr"/>
             <iq:product id="d2bravo"/>
-            <iq:product id="fr630"/>
+            <iq:product id="d2bravo_titanium"/>    
+            <iq:product id="fenix3"/>
+            <iq:product id="fenix3_hr"/>            
+            <iq:product id="fenix5"/>
+            <iq:product id="fenix5plus"/>
+            <iq:product id="fenix5s"/>
+            <iq:product id="fenix5splus"/>
+            <iq:product id="fenix5x"/>
+            <iq:product id="fenix5xplus"/>                   
+            <iq:product id="fenixchronos"/>
             <iq:product id="fr235"/>
             <iq:product id="fr230"/>      
+            <iq:product id="fr630"/>
             <iq:product id="fr735xt"/>
-            <iq:product id="d2bravo_titanium"/>                  
         </iq:products>
-
-        <iq:permissions/>
 
         <iq:languages/>
 

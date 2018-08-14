@@ -30,6 +30,9 @@ Features include:
 
 
 Version history:
+V1.9 - Add support for 
+V1.81 - Fix defect in drawing hands when second hand turned off
+v2.1 - Add support for Fenix Chronos and Fenix 5s
 v2.0 - Added optional UTC hand with large circle and configurable highlight colour
      - New optional moon phase indicator in place of numeral 6 or 9.
      - New configurable second-hand style (arrow or pointer) 
@@ -48,3 +51,5 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  
 "C:\Program Files\Java\jre1.8.0_51\bin\java" -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -classpath "C:\Program Files\Java\jre1.8.0_51\lib\tools.jar;D:\garminSDK\bin\monkeybrains.jar;" com.garmin.monkeybrains.Monkeybrains -e -a D:\garminSDK\bin\api.db -i D:\garminSDK\bin\api.debug.xml -o C:\Users\mark\Dropbox\coding\ActivityClassicv2.iq -z C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\resources\resources.xml;C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\resources-d2bravo\resources.xml;C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\resources-fenix3\resources.xml -m C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\manifest.xml -u D:\garminSDK\bin\devices.xml -p D:\garminSDK\bin\projectInfo.xml C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\source\ActivityClassicView.mc C:\Users\mark\Dropbox\coding\connectiq\ActivityClassic\source\ActivityClassicApp.mc
+
+
