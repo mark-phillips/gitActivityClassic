@@ -31,6 +31,8 @@ Features include:
 
 Version history:
 
+V2.1 - Add support for fr245, fr245m, fr945, marqathlete, marqaviator, marqcaptain, marqdriver, marqexpedition, vivoactive3d
+       Fixed slow update problem.                         
 V2   - Add support for Approach®S60, fēnix® 5, fēnix® 5X, Forerunner® 935, d2charlie, d2delta, d2deltapx, d2deltas, descentmk1, fr645, fr645m, vivoactive3, vivoactive3m,            
 V1.81 - Fix defect in drawing hands when second hand turned off
 v1.8 - Add support for Fenix Chronos and Fenix 5s
@@ -45,7 +47,7 @@ v1.5 - Add support for fr735xt and d2bravo_titanium.
      - Add notification arc.  Thanks to Milos Herman for the suggestion.         
 v1.1 - Changed layout for improved readabilty in poor light
 v1.0 - Initial release (available from: https://www.dropbox.com/s/aub5zlx1h5kueko/ActivityClassicv1.0.prg?dl=0 - can be side loaded by connecting watch to PC and copying the prg to \GARM\APPS) 
-
+(if you prefer the simpler first version to later versions then you can download it from: https://www.dropbox.com/s/aub5zlx1h5kueko/ActivityClassicv1.0.prg?dl=0  and then "side load" it to your watch by connecting your watch to a PC and copying the *.prg file to the GARMINAPPS folder) 
 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 

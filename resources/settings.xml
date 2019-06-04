@@ -107,9 +107,9 @@
            
         <setting propertyKey="@Properties.MAIN_HAND_STYLE" title="@Strings.main_hand_style">
             <settingConfig type="list">
-<!--                <listEntry value="100">@Rez.Strings.POINTER_HAND</listEntry>  -->
+<!--                                 <listEntry value="100">@Rez.Strings.POINTER_HAND</listEntry> -->
                 <listEntry value="101">@Rez.Strings.ARROW_HAND</listEntry>
-<!--                 <listEntry value="102">@Rez.Strings.CIRCLE_HAND</listEntry>   -->
+                <listEntry value="102">@Rez.Strings.CIRCLE_HAND</listEntry>  
 <!--                 <listEntry value="103">@Rez.Strings.SWORD_HAND</listEntry>   -->
                 <listEntry value="104">@Rez.Strings.ARROW_HAND3D</listEntry>
             </settingConfig>

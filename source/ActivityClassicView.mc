@@ -108,6 +108,7 @@ class ActivityClassicView extends Ui.WatchFace {
     function onShow()
     {
       if (trace) { trace_entry("onShow","none"); }
+      PREVIOUS_MINUTE_OF_DAY = -1;
       if (trace) { trace_exit("onShow"); }
     }
 
@@ -317,7 +318,7 @@ class ActivityClassicView extends Ui.WatchFace {
         var reverse_angle_in_radians  = angle_in_radians -  Math.PI; // opposite angle
         var xcenter = screen_width/2;
         var ycenter = screen_height/2;
-        var radius = (width*2.5);
+        var radius = (width*2.1);
         var inner_radius = radius*.75;
 
 
@@ -382,6 +383,12 @@ class ActivityClassicView extends Ui.WatchFace {
         if (MAIN_HAND_STYLE == ARROW3D) {
             drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,true);
         }
+        else if (MAIN_HAND_STYLE == POINTER) {
+            drawPointerHand(dc,min,length,arrowLength,width/2,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,true);
+        }
+        else if (MAIN_HAND_STYLE == CIRCLE) {
+            drawCircleHand(dc,min,length,arrowLength,5,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,Gfx.COLOR_WHITE);
+        }
         else if (MAIN_HAND_STYLE == ARROW)  {
             drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,false);
         }
@@ -400,7 +407,11 @@ class ActivityClassicView extends Ui.WatchFace {
         else if (MAIN_HAND_STYLE == ARROW)  {
             drawArrowHand(dc,min,length,arrowLength,width,start,Gfx.COLOR_WHITE,false);
         }
+        else if (MAIN_HAND_STYLE == CIRCLE) {
+            drawCircleHand(dc,min,length,arrowLength,5,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,Gfx.COLOR_WHITE);
+        }
         else if (MAIN_HAND_STYLE == POINTER) {
+            drawPointerHand(dc,min,length,arrowLength,width/2,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,true);
         }
         else if (MAIN_HAND_STYLE == SWORD) {
         }
@@ -431,7 +442,7 @@ class ActivityClassicView extends Ui.WatchFace {
     function drawUTCHand(dc,hour)
     {
         if (UTC_HAND_STYLE == ARROW) {
-            drawArrowPointerHand(dc,hour,adjustSemiRound(25),adjustSemiRound(21),5,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,UTC_HIGHLIGHT_COLOUR);
+            drawArrowPointerHand(dc,hour,adjustSemiRound(25),adjustSemiRound(22),5,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,UTC_HIGHLIGHT_COLOUR);
         } else {
             drawCircleHand(dc,hour,adjustSemiRound(50),adjustSemiRound(25),4,Gfx.COLOR_LT_GRAY,Gfx.COLOR_DK_GRAY,UTC_HIGHLIGHT_COLOUR);
         }
@@ -693,38 +704,38 @@ class ActivityClassicView extends Ui.WatchFace {
     {
       if (trace) { trace_entry("onUpdate","none"); }
 
-        // First time in, work out screen constants
-        if (screen_type == SCREEN_UNKNOWN) {
-          screen_width = dc.getWidth();
-          screen_height = dc.getHeight();
-          if (screen_width == 218 and screen_height == 218) {
-            screen_type = SCREEN_ROUND;
-          }
-          else if (screen_width == 215 and screen_height == 180) {
-            screen_type = SCREEN_SEMI_ROUND;
-          }
-          radius = screen_height/2;
+      // First time in, work out screen constants
+      if (screen_type == SCREEN_UNKNOWN) {
+        screen_width = dc.getWidth();
+        screen_height = dc.getHeight();
+        if (screen_width == 218 and screen_height == 218) {
+          screen_type = SCREEN_ROUND;
         }
+        else if (screen_width == 215 and screen_height == 180) {
+          screen_type = SCREEN_SEMI_ROUND;
+        }
+        radius = screen_height/2;
+      }
 
-        var xcenter = screen_width/2;
-        var ycenter = screen_height/2;
-        var clockTime = Sys.getClockTime();
-        var now = Time.now();
-        var minute_of_day_12_hour_clock =( ( ( clockTime.hour % 12 ) * 60 ) + clockTime.min );  // 12 hour time in minutes
-        var minute_of_day =( ( ( clockTime.hour ) * 60 ) + clockTime.min );  // 24 hour time in minutes
-        var activityInfo;
+      var xcenter = screen_width/2;
+      var ycenter = screen_height/2;
+      var clockTime = Sys.getClockTime();
+      var now = Time.now();
+      var minute_of_day_12_hour_clock =( ( ( clockTime.hour % 12 ) * 60 ) + clockTime.min );  // 12 hour time in minutes
+      var minute_of_day =( ( ( clockTime.hour ) * 60 ) + clockTime.min );  // 24 hour time in minutes
+      var activityInfo;
 
-        if (updateSettings) {
-          RetrieveSettings();
-          updateSettings = false;
-        }
-        else
-        if ( PREVIOUS_MINUTE_OF_DAY == minute_of_day &&
-             highPowerMode == false &&
-             firstUpdateAfterSleep == false)
-        {
-          return;  // Don't update > once a minute
-        }
+      if (updateSettings) {
+        RetrieveSettings();
+        updateSettings = false;
+      }
+      else
+      if ( PREVIOUS_MINUTE_OF_DAY == minute_of_day &&
+           highPowerMode == false &&
+           firstUpdateAfterSleep == false)
+      {
+        return;  // Don't update > once a minute
+      }
 
         activityInfo = Act.getInfo();
         //prevent divide by 0 if stepGoal is 0

@@ -3,6 +3,10 @@ using Toybox.Time as time;
 using Toybox.Time.Gregorian as gregorian;
 
 // http://en.wikipedia.org/wiki/Sunrise_equation
+// Credit and thanks to Filip Andersson for the algorithm from his Sunrise / Sunset Widget
+// https://github.com/anderssonfilip/SunriseSunset/blob/master/source/SunriseEquation.mc
+// https://apps.garmin.com/en-US/apps/97352d10-5316-4e9c-8399-288228d3dcb2
+
 class SunriseEquation{
     var MORNING = false;
     var AFTERNOON = true;
