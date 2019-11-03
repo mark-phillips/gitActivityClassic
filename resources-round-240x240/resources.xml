@@ -1,0 +1,10 @@
+<resources>
+	<bitmap id="background_icons_id" filename="images/background-240x240-transparent-icons.png">
+		<palette>
+			<color>FFFFFF</color>
+			<color>000000</color>
+			<color>00AAFF</color>
+			<color>AAAAAA</color>
+		</palette>
+	</bitmap>
+</resources>

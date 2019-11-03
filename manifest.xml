@@ -39,7 +39,9 @@
             <iq:product id="vivoactive3mlte"/>
         </iq:products>
 
-        <iq:languages/>
+        <iq:languages>
+            <iq:language>eng</iq:language>
+        </iq:languages>             
 
     </iq:application>
 </iq:manifest>
